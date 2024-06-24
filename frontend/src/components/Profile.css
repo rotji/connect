@@ -1,0 +1,36 @@
+.profile-container {
+ max-width: 600px;
+ margin: 0 auto;
+ padding: 20px;
+ border: 1px solid #ccc;
+ border-radius: 10px;
+ background-color: var(--profile-bg-color, #ffffff);
+ /* Use a custom property with a fallback */
+}
+
+.profile-picture {
+ max-width: 100%;
+ height: auto;
+ border-radius: 50%;
+ margin-bottom: 20px;
+}
+
+button.profile-button {
+ margin: 5px;
+ padding: 10px 15px;
+ border: none;
+ background-color: #007bff;
+ color: white;
+ cursor: pointer;
+}
+
+button.profile-button:hover {
+ background-color: #0056b3;
+}
+
+@media (prefers-color-scheme: light) {
+ .profile-container {
+  background-color: var(--profile-bg-color-light, #ffffff);
+  /* Light mode background */
+ }
+}
