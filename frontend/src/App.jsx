@@ -42,7 +42,8 @@ function App() {
   return (
     <div className="App">
       <header>
-        <img src={logo} className="App-logo" alt="logo" />
+        <div className="title">FutureFriends</div>
+        <img src={logo} className="logo" alt="logo" />
         <h1>Future Friends</h1>
       </header>
       {!token ? (
