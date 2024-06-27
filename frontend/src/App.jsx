@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import Register from './components/Register';
-import Login from './components/Login'; // Ensure this import is correct
+import Login from './components/Login';
 import Profile from './components/Profile';
+import PostList from './components/PostList';
 import Chat from './components/Chat'; // Ensure this import is correct
 import io from 'socket.io-client';
 import logo from '../public/images/logo.png'; // Correct path to your logo
@@ -49,12 +50,13 @@ function App() {
       {!token ? (
         <>
           <Register />
-          <Login setToken={setToken} /> {/* Correct import used here */}
+          <Login setToken={setToken} />
         </>
       ) : (
         <>
           <Profile />
-          <Chat messages={messages} message={message} setMessage={setMessage} sendMessage={sendMessage} /> {/* Correct import used here */}
+          <PostList />
+          <Chat messages={messages} message={message} setMessage={setMessage} sendMessage={sendMessage} />
         </>
       )}
     </div>
