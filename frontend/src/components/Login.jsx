@@ -1,5 +1,7 @@
+// src/components/Login.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
+import './Login.css'; // Import the Login.css file
 
 const Login = ({ setToken }) => {
   const [formData, setFormData] = useState({
@@ -29,12 +31,29 @@ const Login = ({ setToken }) => {
   };
 
   return (
-    <form onSubmit={onSubmit}>
-      <input type="email" name="email" value={email} onChange={onChange} placeholder="Email" required />
-      <input type="password" name="password" value={password} onChange={onChange} placeholder="Password" required />
-      <button type="submit">Login</button>
-    </form>
+    <div className="login-container">
+      <h2>Login</h2>
+      <form onSubmit={onSubmit}>
+        <input 
+          type="email" 
+          name="email" 
+          value={email} 
+          onChange={onChange} 
+          placeholder="Email" 
+          required 
+        />
+        <input 
+          type="password" 
+          name="password" 
+          value={password} 
+          onChange={onChange} 
+          placeholder="Password" 
+          required 
+        />
+        <button type="submit">Login</button>
+      </form>
+    </div>
   );
 };
 
-export default Login; // Ensure this line is present
+export default Login;
