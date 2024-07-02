@@ -1,13 +1,13 @@
-// src/App.jsx
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom'; // Import Routes and Route
 import './App.css';
 import Register from './components/Register';
 import Login from './components/Login';
 import Profile from './components/Profile';
 import PostList from './components/PostList';
-import Chat from './components/Chat'; // Ensure this import is correct
+import Chat from './components/Chat';
+import Navbar from './components/Navbar'; // Ensure this import is correct
 import io from 'socket.io-client';
-import logo from '../public/images/logo.png'; // Correct path to your logo
 
 const socket = io('http://localhost:5000');
 
@@ -42,23 +42,28 @@ function App() {
 
   return (
     <div className="App">
+      <Navbar />
       <header>
-        <div className="title">FutureFriends</div>
-        <img src={logo} className="logo" alt="logo" />
-        <h1>Future Friends</h1>
+        <h1>Future Friends</h1> {/* Retain the h1 tag if it's necessary */}
       </header>
-      {!token ? (
-        <>
-          <Register />
-          <Login setToken={setToken} />
-        </>
-      ) : (
-        <>
-          <Profile />
-          <PostList />
-          <Chat messages={messages} message={message} setMessage={setMessage} sendMessage={sendMessage} />
-        </>
-      )}
+      <Routes>
+        {!token ? (
+          <>
+            <Route path="/" element={<Navigate to="/login" />} />
+            <Route path="/register" element={<Register setToken={setToken} />} />
+            <Route path="/login" element={<Login setToken={setToken} />} />
+          </>
+        ) : (
+          <>
+            <Route path="/" element={<Profile />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/posts" element={<PostList />} />
+            <Route path="/chat" element={<Chat messages={messages} message={message} setMessage={setMessage} sendMessage={sendMessage} />} />
+          </>
+        )}
+        {/* Fallback for unmatched routes */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     </div>
   );
 }

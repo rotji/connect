@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import PropTypes from 'prop-types';
 import './Register.css'; // Ensure this import is correct
 
 const Register = ({ setToken }) => {
@@ -35,8 +36,10 @@ const Register = ({ setToken }) => {
     }
   };
 
+  console.log("Register component rendered"); // Debug log
+
   return (
-    <div className="register-container">
+    <div className="register-container" style={{ border: "1px solid red" }}> {/* Temporary border for debugging */}
       <h2>Register</h2>
       <form onSubmit={onSubmit}>
         <input type="text" name="name" value={name} onChange={onChange} placeholder="Name" required />
@@ -47,6 +50,10 @@ const Register = ({ setToken }) => {
       </form>
     </div>
   );
+};
+
+Register.propTypes = {
+  setToken: PropTypes.func.isRequired,
 };
 
 export default Register;
