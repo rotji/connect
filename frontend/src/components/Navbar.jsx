@@ -14,6 +14,8 @@ const Navbar = () => {
         <li><Link to="/profile">Profile</Link></li>
         <li><Link to="/posts">Posts</Link></li>
         <li><Link to="/chat">Chat</Link></li>
+        <li><Link to="/register">Register</Link></li>
+        <li><Link to="/login">Login</Link></li>
       </ul>
     </nav>
   );

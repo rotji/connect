@@ -26,10 +26,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 mongoose.connect('mongodb://localhost:27017/futurefriends', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  useCreateIndex: true, // Add this line if missing to avoid deprecation warnings
 });
 
-// Handle Websocket connections
+// Handle WebSocket connections
 io.on('connection', (socket) => {
   console.log('A user connected');
   

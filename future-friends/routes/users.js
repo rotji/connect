@@ -23,7 +23,7 @@ const upload = multer({ storage });
 
 // Register new user
 router.post('/register', async (req, res) => {
-  const { name, email, password, category, details, phone } = req.body;
+  const { name, email, password } = req.body;
 
   try {
     let user = await User.findOne({ email });
@@ -31,7 +31,7 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ msg: 'User already exists' });
     }
 
-    user = new User({ name, email, password, category, details, phone });
+    user = new User({ name, email, password });
 
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
