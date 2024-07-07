@@ -6,6 +6,7 @@ import Login from './components/Login';
 import Profile from './components/Profile';
 import PostList from './components/PostList';
 import Chat from './components/Chat';
+import Directory from './components/Directory';
 import Navbar from './components/Navbar';
 import io from 'socket.io-client';
 
@@ -52,6 +53,7 @@ function App() {
         <Route path="/chat" element={<Chat messages={messages} message={message} setMessage={setMessage} sendMessage={sendMessage} />} />
         <Route path="/register" element={<Register setToken={setToken} />} />
         <Route path="/login" element={<Login setToken={setToken} />} />
+        <Route path="/directory" element={<Directory />} /> 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
