@@ -7,7 +7,6 @@ import Profile from './components/Profile';
 import PostList from './components/PostList';
 import Chat from './components/Chat';
 import Navbar from './components/Navbar';
-import TestComponent from './components/TestComponent';
 import io from 'socket.io-client';
 
 const socket = io('http://localhost:5000');
@@ -53,7 +52,6 @@ function App() {
         <Route path="/chat" element={<Chat messages={messages} message={message} setMessage={setMessage} sendMessage={sendMessage} />} />
         <Route path="/register" element={<Register setToken={setToken} />} />
         <Route path="/login" element={<Login setToken={setToken} />} />
-        <Route path="/test" element={<TestComponent />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
