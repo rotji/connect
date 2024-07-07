@@ -16,6 +16,7 @@ const Navbar = () => {
         <li><Link to="/chat">Chat</Link></li>
         <li><Link to="/register">Register</Link></li>
         <li><Link to="/login">Login</Link></li>
+        <Link to="/directory">Directory</Link>
       </ul>
     </nav>
   );
