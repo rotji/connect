@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const http = require('http');
@@ -23,10 +24,11 @@ app.use(cors());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Database connection
-mongoose.connect('mongodb://localhost:27017/futurefriends', {
+mongoose.connect(process.env.DATABASE_URL || 'mongodb://localhost:27017/futurefriends', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
+
 
 // Handle WebSocket connections
 io.on('connection', (socket) => {

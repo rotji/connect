@@ -2,14 +2,14 @@
 import React, { useEffect, useState } from 'react';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const socket = io(process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000');
+
 
 const Chat = () => {
   const [message, setMessage] = useState('');
   const [chat, setChat] = useState([]);
 
-  useEffect(() => {
-    socket.on('chatMessage', (msg) => {
+  useEffect(() => {    socket.on('chatMessage', (msg) => {
       setChat((prevChat) => [...prevChat, msg]);
     });
 
