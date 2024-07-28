@@ -8,9 +8,15 @@ const Register = ({ setToken }) => {
   const [category, setCategory] = useState('');
   const [details, setDetails] = useState('');
   const [phone, setPhone] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     const userData = { name, email, password, category, details, phone };
 
     try {
@@ -26,11 +32,23 @@ const Register = ({ setToken }) => {
       if (response.ok) {
         setToken(data.token);
         localStorage.setItem('token', data.token);
+        setName(''); 
+        setEmail(''); 
+        setPassword(''); 
+        setCategory('');
+        setDetails('');
+        setPhone('');
+        setMessage('Registration successful!');
+        console.log('Registration successful:', data);
       } else {
+        setMessage('Registration failed: ' + (data.msg || 'Please try again.'));
         console.error('Registration failed:', data);
       }
     } catch (error) {
+      setMessage('Error during registration: ' + error.message);
       console.error('Error during registration:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -50,6 +68,7 @@ const Register = ({ setToken }) => {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          autoComplete="off"
           required
         />
         <input
@@ -57,6 +76,7 @@ const Register = ({ setToken }) => {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          autoComplete="off"
           required
         />
         <input
@@ -80,8 +100,11 @@ const Register = ({ setToken }) => {
           onChange={(e) => setPhone(e.target.value)}
           required
         />
-        <button type="submit">Register</button>
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Registering...' : 'Register'}
+        </button>
       </form>
+      {message && <p>{message}</p>}
     </div>
   );
 };

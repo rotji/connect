@@ -2,8 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import io from 'socket.io-client';
 
-const socket = io(process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000');
+const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+console.log('Socket URL:', socketUrl);
 
+const socket = io(socketUrl);
 
 const Chat = () => {
   const [message, setMessage] = useState('');

@@ -24,11 +24,17 @@ app.use(cors());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Database connection
-mongoose.connect(process.env.DATABASE_URL || 'mongodb://localhost:27017/futurefriends', {
+const dbUri = process.env.DATABASE_URL || 'mongodb://localhost:27017/futurefriends';
+
+mongoose.connect(dbUri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+})
+.then(() => console.log(`Connected to MongoDB at ${dbUri}`))
+.catch(err => {
+  console.error('Failed to connect to MongoDB', err);
+  process.exit(1); // Exit the application if the database connection fails
 });
-
 
 // Handle WebSocket connections
 io.on('connection', (socket) => {
@@ -51,6 +57,12 @@ app.get('/', (req, res) => {
 // Use the user routes
 app.use('/api/users', userRoutes); 
 app.use('/api/posts', postRoutes); 
+
+// Add error handling for JSON response
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Server error' }); 
+});
 
 // Start server
 const PORT = process.env.PORT || 5000;

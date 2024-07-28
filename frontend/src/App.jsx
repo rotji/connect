@@ -8,8 +8,10 @@ import PostList from './components/PostList';
 import Chat from './components/Chat';
 import Directory from './components/Directory';
 import Navbar from './components/Navbar';
+import Home from './components/Home'; 
 import io from 'socket.io-client';
 
+// Import environment variables
 const socket = io('http://localhost:5000');
 
 function App() {
@@ -47,7 +49,8 @@ function App() {
       </header>
       <Routes>
         {/* Removed the conditional rendering based on token */}
-        <Route path="/" element={<Profile />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/posts" element={<PostList />} />
         <Route path="/chat" element={<Chat messages={messages} message={message} setMessage={setMessage} sendMessage={sendMessage} />} />

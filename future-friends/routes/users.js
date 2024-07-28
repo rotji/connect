@@ -8,7 +8,7 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-const SECRET_KEY = 'yourSecretKey';
+const SECRET_KEY = process.env.JWT_SECRET || 'yourSecretKey';
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -23,7 +23,7 @@ const upload = multer({ storage });
 
 // Register new user
 router.post('/register', async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, category, details, phone } = req.body;
 
   try {
     let user = await User.findOne({ email });
@@ -31,12 +31,14 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ msg: 'User already exists' });
     }
 
-    user = new User({ name, email, password });
+    user = new User({ name, email, password, category, details, phone });
 
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
 
     await user.save();
+
+    console.log('User registered:', user); // Log the user data
 
     const payload = {
       user: {
