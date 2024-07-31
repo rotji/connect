@@ -16,7 +16,8 @@ const Navbar = () => {
         <li><Link to="/chat">Chat</Link></li>
         <li><Link to="/register">Register</Link></li>
         <li><Link to="/login">Login</Link></li>
-        <Link to="/directory">Directory</Link>
+        <li><Link to="/search">Search</Link></li>
+        <li><Link to="/registered-users">Registered Users</Link></li> {/* Add this line */}
       </ul>
     </nav>
   );

@@ -8,6 +8,8 @@ const Register = ({ setToken }) => {
   const [category, setCategory] = useState('');
   const [details, setDetails] = useState('');
   const [phone, setPhone] = useState('');
+  const [interest, setInterest] = useState('');
+  const [expectation, setExpectation] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -17,7 +19,7 @@ const Register = ({ setToken }) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    const userData = { name, email, password, category, details, phone };
+    const userData = { name, email, password, category, details, phone, interest, expectation };
 
     try {
       const response = await fetch('http://localhost:5000/api/users/register', {
@@ -32,12 +34,14 @@ const Register = ({ setToken }) => {
       if (response.ok) {
         setToken(data.token);
         localStorage.setItem('token', data.token);
-        setName(''); 
-        setEmail(''); 
-        setPassword(''); 
+        setName('');
+        setEmail('');
+        setPassword('');
         setCategory('');
         setDetails('');
         setPhone('');
+        setInterest('');
+        setExpectation('');
         setMessage('Registration successful!');
         console.log('Registration successful:', data);
       } else {
@@ -98,6 +102,20 @@ const Register = ({ setToken }) => {
           placeholder="Phone"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Interest"
+          value={interest}
+          onChange={(e) => setInterest(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Expectation"
+          value={expectation}
+          onChange={(e) => setExpectation(e.target.value)}
           required
         />
         <button type="submit" disabled={isSubmitting}>

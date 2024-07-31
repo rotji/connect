@@ -1,0 +1,39 @@
+.search-container {
+ padding: 20px;
+ max-width: 600px;
+ margin: auto;
+}
+
+.search-input {
+ width: 100%;
+ padding: 10px;
+ margin-bottom: 20px;
+ border: 1px solid #ccc;
+ border-radius: 4px;
+}
+
+.search-results-list {
+ list-style-type: none;
+ padding: 0;
+}
+
+.search-results-item {
+ border: 1px solid #ddd;
+ padding: 10px;
+ margin-bottom: 10px;
+ border-radius: 4px;
+ background-color: #f9f9f9;
+}
+
+.search-results-item p {
+ margin: 5px 0;
+}
+
+.search-results-item strong {
+ color: #555;
+}
+
+.error {
+ color: red;
+ margin-bottom: 20px;
+}

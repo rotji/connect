@@ -26,6 +26,14 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  interest: {
+    type: String,
+    required: true,
+  },
+  expectation: {
+    type: String,
+    required: true,
+  },
   profilePicture: {
     type: String,
   },
