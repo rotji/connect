@@ -33,14 +33,12 @@ router.post('/register', async (req, res) => {
   const { name, email, password, category, details, phone, interest, expectation } = req.body;
 
   if (!name || !email || !password || !category || !details || !phone || !interest || !expectation) {
-    logger.error('Registration failed: Missing fields');
     return res.status(400).json({ msg: 'Please enter all fields' });
   }
 
   try {
     let user = await User.findOne({ email });
     if (user) {
-      logger.error(`Registration failed: User already exists (${email})`);
       return res.status(400).json({ msg: 'User already exists' });
     }
 
@@ -66,20 +64,17 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    logger.error('Login failed: Missing fields');
     return res.status(400).json({ msg: 'Please enter all fields' });
   }
 
   try {
     let user = await User.findOne({ email });
     if (!user) {
-      logger.error(`Login failed: Invalid credentials (${email})`);
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      logger.error(`Login failed: Invalid credentials (${email})`);
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
@@ -140,6 +135,54 @@ router.get('/all', async (req, res) => {
     res.json(users);
   } catch (err) {
     logger.error(`Error fetching users: ${err.message}`);
+    res.status(500).send('Server error');
+  }
+});
+
+// Route to get all unique interests
+router.get('/interests', async (req, res) => {
+  try {
+    const interests = await User.distinct('interest');
+    res.json(interests);
+  } catch (err) {
+    logger.error(`Error fetching interests: ${err.message}`);
+    res.status(500).send('Server error');
+  }
+});
+
+// Route to get all unique expectations
+router.get('/expectations', async (req, res) => {
+  try {
+    const expectations = await User.distinct('expectation');
+    res.json(expectations);
+  } catch (err) {
+    logger.error(`Error fetching expectations: ${err.message}`);
+    res.status(500).send('Server error');
+  }
+});
+
+// Route to get users by interest or expectation
+router.get('/profiles', async (req, res) => {
+  const { interest, expectation } = req.query;
+
+  try {
+    let users;
+
+    if (interest) {
+      users = await User.find({ interest }).select('-password');
+    } else if (expectation) {
+      users = await User.find({ expectation }).select('-password');
+    } else {
+      return res.status(400).json({ msg: 'Interest or expectation required' });
+    }
+
+    if (!users.length) {
+      return res.status(404).json({ msg: 'No profiles found' });
+    }
+
+    res.json(users);
+  } catch (err) {
+    logger.error(`Error fetching profiles by interest or expectation: ${err.message}`);
     res.status(500).send('Server error');
   }
 });

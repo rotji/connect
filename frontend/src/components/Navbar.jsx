@@ -17,7 +17,10 @@ const Navbar = () => {
         <li><Link to="/register">Register</Link></li>
         <li><Link to="/login">Login</Link></li>
         <li><Link to="/search">Search</Link></li>
-        <li><Link to="/registered-users">Registered Users</Link></li> {/* Add this line */}
+        <li><Link to="/registered-users">Registered Users</Link></li> 
+        <Link to="/interest-list">Interest List</Link>
+        <Link to="/expectation-list">Expectation List</Link>
+        <li><Link to="/about">About</Link></li>
       </ul>
     </nav>
   );

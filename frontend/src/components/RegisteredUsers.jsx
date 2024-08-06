@@ -21,12 +21,6 @@ const RegisteredUsers = () => {
     };
 
     fetchUsers();
-
-    // Cleanup function to avoid setting state on unmounted component
-    return () => {
-      setLoading(false);
-      setError(null);
-    };
   }, []);
 
   if (loading) {

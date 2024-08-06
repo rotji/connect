@@ -21,6 +21,8 @@ const Register = ({ setToken }) => {
 
     const userData = { name, email, password, category, details, phone, interest, expectation };
 
+    console.log('User data being submitted:', userData);
+
     try {
       const response = await fetch('http://localhost:5000/api/users/register', {
         method: 'POST',
@@ -31,6 +33,8 @@ const Register = ({ setToken }) => {
       });
 
       const data = await response.json();
+      console.log('Response data:', data);
+      
       if (response.ok) {
         setToken(data.token);
         localStorage.setItem('token', data.token);
@@ -45,7 +49,8 @@ const Register = ({ setToken }) => {
         setMessage('Registration successful!');
         console.log('Registration successful:', data);
       } else {
-        setMessage('Registration failed: ' + (data.msg || 'Please try again.'));
+        const errorMessage = data.msg || 'Registration failed. Please try again.';
+        setMessage(errorMessage);
         console.error('Registration failed:', data);
       }
     } catch (error) {

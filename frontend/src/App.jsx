@@ -3,13 +3,17 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import Register from './components/Register';
 import Login from './components/Login';
-import Profile from './components/Profile';
+import Profile from './components/profile';
 import PostList from './components/PostList';
 import Chat from './components/Chat';
 import Search from './components/Search';
-import RegisteredUsers from './components/RegisteredUsers'; // Imported RegisteredUsers
+import RegisteredUsers from './components/RegisteredUsers';
+import InterestList from './components/InterestList';
+import ExpectationList from './components/ExpectationList';
 import Navbar from './components/Navbar';
 import Home from './components/Home'; 
+import About from './components/About';
+import UserProfilesByInterestOrExpectation from './components/UserProfilesByInterestOrExpectation';
 import io from 'socket.io-client';
 
 const socket = io('http://localhost:5000');
@@ -50,13 +54,17 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/about" element={<About />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/posts" element={<PostList />} />
         <Route path="/chat" element={<Chat messages={messages} message={message} setMessage={setMessage} sendMessage={sendMessage} />} />
         <Route path="/register" element={<Register setToken={setToken} />} />
         <Route path="/login" element={<Login setToken={setToken} />} />
         <Route path="/search" element={<Search />} />
-        <Route path="/registered-users" element={<RegisteredUsers />} /> {/* Added RegisteredUsers route */}
+        <Route path="/registered-users" element={<RegisteredUsers />} />
+        <Route path="/interest-list" element={<InterestList />} />
+        <Route path="/expectation-list" element={<ExpectationList />} />
+        <Route path="/profiles" element={<UserProfilesByInterestOrExpectation />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
