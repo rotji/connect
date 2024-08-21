@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import UpdateProfile from './UpdateProfile';
-import CreatePost from './CreatePost';
-import PostList from './PostList';
 import './Profile.css';
 
 const Profile = () => {
@@ -27,13 +25,6 @@ const Profile = () => {
   const handleProfileUpdate = useCallback((updatedProfile) => {
     setProfile(updatedProfile);
     setIsEditing(false);
-  }, []);
-
-  const handlePostCreate = useCallback((newPost) => {
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      posts: [newPost, ...prevProfile.posts], // Ensure the new post is added to the list
-    }));
   }, []);
 
   const handleLogout = () => {
@@ -68,8 +59,6 @@ const Profile = () => {
       {isEditing && (
         <UpdateProfile profile={profile} setProfile={handleProfileUpdate} setIsEditing={setIsEditing} />
       )}
-      <CreatePost onCreatePost={handlePostCreate} user={profile._id} />
-      <PostList posts={profile.posts} />
     </div>
   );
 };
