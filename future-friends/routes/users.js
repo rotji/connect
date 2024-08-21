@@ -1,16 +1,12 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const multer = require('multer');
-const path = require('path');
 const User = require('../models/User');
-const auth = require('../middleware/auth');
 const logger = require('../logger'); // Winston logger
 
 const router = express.Router();
 
-const SECRET_KEY = process.env.JWT_SECRET || 'yourSecretKey';
-
+// Multer configuration for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -22,11 +18,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Helper function to generate JWT
-const generateToken = (user) => {
-  const payload = { user: { id: user.id } };
-  return jwt.sign(payload, SECRET_KEY, { expiresIn: 3600 });
-};
+// In-memory store for the currently logged-in user
+let currentUser = null;
 
 // Register new user
 router.post('/register', async (req, res) => {
@@ -51,15 +44,14 @@ router.post('/register', async (req, res) => {
 
     logger.info(`User registered: ${user.id}`);
 
-    const token = generateToken(user);
-    res.json({ token });
+    res.json({ msg: 'User registered successfully', user });
   } catch (err) {
     logger.error(`Error during user registration: ${err.message}`);
     res.status(500).send('Server error');
   }
 });
 
-// Login user
+// Login user and set currentUser
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -78,20 +70,30 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
+    // Set the currentUser to the logged-in user
+    currentUser = user;
+
     logger.info(`User logged in: ${user.id}`);
 
-    const token = generateToken(user);
-    res.json({ token });
+    // Automatically return the user's profile upon successful login
+    res.json({ msg: 'User logged in successfully', user });
   } catch (err) {
     logger.error(`Error during user login: ${err.message}`);
     res.status(500).send('Server error');
   }
 });
 
-// Get user profile
-router.get('/profile', auth, async (req, res) => {
+// Get profile of the current logged-in user
+router.get('/profile', async (req, res) => {
+  if (!currentUser) {
+    return res.status(401).json({ msg: 'No user is currently logged in' });
+  }
+
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findById(currentUser.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ msg: 'No user found' });
+    }
     res.json(user);
   } catch (err) {
     logger.error(`Error fetching user profile: ${err.message}`);
@@ -100,12 +102,20 @@ router.get('/profile', auth, async (req, res) => {
 });
 
 // Update user profile
-router.put('/profile', auth, upload.single('profilePicture'), async (req, res) => {
+router.put('/profile', upload.single('profilePicture'), async (req, res) => {
   const { name, email, category, details, phone, interest, expectation, password } = req.body;
   const profilePicture = req.file ? req.file.filename : null;
 
+  if (!currentUser) {
+    return res.status(401).json({ msg: 'No user is currently logged in' });
+  }
+
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(currentUser.id);
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
 
     if (name) user.name = name;
     if (email) user.email = email;
@@ -128,18 +138,7 @@ router.put('/profile', auth, upload.single('profilePicture'), async (req, res) =
   }
 });
 
-// Route to get all registered users
-router.get('/all', async (req, res) => {
-  try {
-    const users = await User.find().select('-password'); // Exclude password field
-    res.json(users);
-  } catch (err) {
-    logger.error(`Error fetching users: ${err.message}`);
-    res.status(500).send('Server error');
-  }
-});
-
-// Route to get all unique interests
+// Fetch all unique interests
 router.get('/interests', async (req, res) => {
   try {
     const interests = await User.distinct('interest');
@@ -150,7 +149,7 @@ router.get('/interests', async (req, res) => {
   }
 });
 
-// Route to get all unique expectations
+// Fetch all unique expectations
 router.get('/expectations', async (req, res) => {
   try {
     const expectations = await User.distinct('expectation');
@@ -161,30 +160,48 @@ router.get('/expectations', async (req, res) => {
   }
 });
 
-// Route to get users by interest or expectation
-router.get('/profiles', async (req, res) => {
-  const { interest, expectation } = req.query;
+// Search users by name, email, phone, interest, or expectation
+router.get('/search', async (req, res) => {
+  const { query } = req.query;
+
+  if (!query) {
+    return res.status(400).json({ msg: 'Query parameter is required' });
+  }
 
   try {
-    let users;
-
-    if (interest) {
-      users = await User.find({ interest }).select('-password');
-    } else if (expectation) {
-      users = await User.find({ expectation }).select('-password');
-    } else {
-      return res.status(400).json({ msg: 'Interest or expectation required' });
-    }
-
-    if (!users.length) {
-      return res.status(404).json({ msg: 'No profiles found' });
-    }
+    // Perform a case-insensitive search across multiple fields
+    const users = await User.find({
+      $or: [
+        { name: { $regex: query, $options: 'i' } },         // Search by name
+        { email: { $regex: query, $options: 'i' } },        // Search by email
+        { phone: { $regex: query, $options: 'i' } },        // Search by phone number
+        { interest: { $regex: query, $options: 'i' } },     // Search by interest
+        { expectation: { $regex: query, $options: 'i' } },  // Search by expectation
+      ],
+    }).select('-password');  // Exclude password from results
 
     res.json(users);
   } catch (err) {
-    logger.error(`Error fetching profiles by interest or expectation: ${err.message}`);
+    logger.error(`Error during user search: ${err.message}`);
     res.status(500).send('Server error');
   }
+});
+
+// Fetch all registered users
+router.get('/all', async (req, res) => {
+  try {
+    const users = await User.find().select('-password');
+    res.json(users);
+  } catch (err) {
+    logger.error(`Error fetching users: ${err.message}`);
+    res.status(500).send('Server error');
+  }
+});
+
+// Logout user and clear currentUser
+router.post('/logout', (req, res) => {
+  currentUser = null;
+  res.json({ msg: 'User logged out successfully' });
 });
 
 module.exports = router;

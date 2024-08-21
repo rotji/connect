@@ -1,10 +1,9 @@
-// src/components/Profile.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import UpdateProfile from './UpdateProfile';
 import CreatePost from './CreatePost';
 import PostList from './PostList';
-import './Profile.css'; // Import the CSS file
+import './Profile.css';
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
@@ -13,38 +12,32 @@ const Profile = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const token = localStorage.getItem('token');
-      console.log('Token:', token); // Log the token
-      if (token) {
-        try {
-          const res = await axios.get('http://localhost:5000/api/users/profile', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          console.log('Profile Response:', res.data);
-          setProfile(res.data);
-        } catch (err) {
-          const errorMsg = err.response ? err.response.data.msg : err.message;
-          setError(`Failed to fetch profile data: ${errorMsg}`);
-          console.error(err);
-        }
-      } else {
-        setError('No token found');
+      try {
+        const res = await axios.get('http://localhost:5000/api/users/profile');
+        setProfile(res.data);
+      } catch (err) {
+        const errorMsg = err.response ? err.response.data.msg : err.message;
+        setError(`Failed to fetch profile data: ${errorMsg}`);
       }
     };
 
     fetchProfile();
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.reload();
-  };
-
-  const handleProfileUpdate = (updatedProfile) => {
+  const handleProfileUpdate = useCallback((updatedProfile) => {
     setProfile(updatedProfile);
     setIsEditing(false);
+  }, []);
+
+  const handlePostCreate = useCallback((newPost) => {
+    setProfile((prevProfile) => ({
+      ...prevProfile,
+      posts: [newPost, ...prevProfile.posts], // Ensure the new post is added to the list
+    }));
+  }, []);
+
+  const handleLogout = () => {
+    window.location.reload(); // Simple reload for logout
   };
 
   if (error) {
@@ -75,8 +68,8 @@ const Profile = () => {
       {isEditing && (
         <UpdateProfile profile={profile} setProfile={handleProfileUpdate} setIsEditing={setIsEditing} />
       )}
-      <CreatePost onCreatePost={handleProfileUpdate} />
-      <PostList />
+      <CreatePost onCreatePost={handlePostCreate} user={profile._id} />
+      <PostList posts={profile.posts} />
     </div>
   );
 };

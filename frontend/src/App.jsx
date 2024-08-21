@@ -3,8 +3,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import Register from './components/Register';
 import Login from './components/Login';
-import Profile from './components/profile';
-import PostList from './components/PostList';
+import Profile from './components/Profile';
+import PostPage from './components/PostPage';
 import Chat from './components/Chat';
 import Search from './components/Search';
 import RegisteredUsers from './components/RegisteredUsers';
@@ -19,16 +19,8 @@ import io from 'socket.io-client';
 const socket = io('http://localhost:5000');
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem('token'));
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      setToken(storedToken);
-    }
-  }, []);
 
   useEffect(() => {
     socket.on('receiveMessage', (message) => {
@@ -56,10 +48,10 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/posts" element={<PostList />} />
+        <Route path="/postpage" element={<PostPage />} />
         <Route path="/chat" element={<Chat messages={messages} message={message} setMessage={setMessage} sendMessage={sendMessage} />} />
-        <Route path="/register" element={<Register setToken={setToken} />} />
-        <Route path="/login" element={<Login setToken={setToken} />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/search" element={<Search />} />
         <Route path="/registered-users" element={<RegisteredUsers />} />
         <Route path="/interest-list" element={<InterestList />} />

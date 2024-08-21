@@ -1,7 +1,8 @@
+// src/components/Register.jsx
 import React, { useState } from 'react';
 import './Register.css';
 
-const Register = ({ setToken }) => {
+const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,8 +37,6 @@ const Register = ({ setToken }) => {
       console.log('Response data:', data);
       
       if (response.ok) {
-        setToken(data.token);
-        localStorage.setItem('token', data.token);
         setName('');
         setEmail('');
         setPassword('');

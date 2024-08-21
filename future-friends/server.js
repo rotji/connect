@@ -7,6 +7,7 @@ const userRoutes = require('./routes/users');
 const postRoutes = require('./routes/posts');  
 const cors = require('cors');
 const path = require('path');
+const logger = require('./logger');
 
 const app = express();
 const server = http.createServer(app);
@@ -54,9 +55,19 @@ app.get('/', (req, res) => {
   res.send('Future-Friends API');
 });
 
-// Use the user routes
+// Use the user routes (no token authentication required)
 app.use('/api/users', userRoutes); 
 app.use('/api/posts', postRoutes); 
+
+// Endpoint to receive and log frontend logs
+app.post('/log', (req, res) => {
+  const { level = 'info', message } = req.body;
+  
+  // Log the message to the server logs
+  logger.log({ level, message }); 
+
+  res.status(200).send('Log received');
+});
 
 // Add error handling for JSON response
 app.use((err, req, res, next) => {

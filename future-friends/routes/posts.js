@@ -1,14 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
 const Post = require('../models/Post');
+const User = require('../models/User'); // Added this line to require User model
 
 // Create a post
-router.post('/', auth, async (req, res) => {
-  const { title, content } = req.body;
+router.post('/', async (req, res) => {
+   console.log(req.body);
+  const { userId, title, content } = req.body; // Changed `user` to `userId` to capture the user ID from the request body
   try {
+    // Validate user exists
+    const user = await User.findById(userId); // Added validation to check if user exists
+    if (!user) {
+      return res.status(400).json({ msg: 'Invalid user' }); // Return error if user does not exist
+    }
+
     const newPost = new Post({
-      user: req.user.id,
+      user: user._id, // Set the `user` field with the valid user ID
       title,
       content,
     });
@@ -22,7 +29,7 @@ router.post('/', auth, async (req, res) => {
 });
 
 // Get all posts
-router.get('/', auth, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const posts = await Post.find().sort({ date: -1 });
     res.json(posts);
@@ -33,7 +40,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // Get post by ID
-router.get('/:id', auth, async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
 
@@ -52,7 +59,7 @@ router.get('/:id', auth, async (req, res) => {
 });
 
 // Update a post
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', async (req, res) => {
   const { title, content } = req.body;
 
   try {
@@ -60,11 +67,6 @@ router.put('/:id', auth, async (req, res) => {
 
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
-    }
-
-    // Check user
-    if (post.user.toString() !== req.user.id) {
-      return res.status(401).json({ msg: 'User not authorized' });
     }
 
     post.title = title || post.title;
@@ -82,17 +84,12 @@ router.put('/:id', auth, async (req, res) => {
 });
 
 // Delete a post
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
 
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
-    }
-
-    // Check user
-    if (post.user.toString() !== req.user.id) {
-      return res.status(401).json({ msg: 'User not authorized' });
     }
 
     await post.remove();

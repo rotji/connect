@@ -1,36 +1,18 @@
-// src/components/PostList.jsx
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import Post from './Post'; // Assuming you have a Post component
+import React from 'react';
 
-const PostList = () => {
-  const [posts, setPosts] = useState([]);
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const res = await axios.get('http://localhost:5000/api/posts', {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-          setPosts(res.data);
-        } catch (err) {
-          console.error('Error fetching posts:', err);
-        }
-      }
-    };
-
-    fetchPosts();
-  }, []);
-
+const PostList = ({ posts }) => {
   return (
     <div>
-      {posts.map(post => (
-        <Post key={post._id} post={post} /> // Use Post component to display each post
-      ))}
+      {posts && posts.length > 0 ? (
+        posts.map((post) => (
+          <div key={post._id} style={{ marginBottom: '20px', padding: '10px', border: '1px solid #ddd' }}>
+            <p>{post.content}</p>
+            <small>Posted by {post.authorName} on {new Date(post.createdAt).toLocaleString()}</small>
+          </div>
+        ))
+      ) : (
+        <p>No posts available.</p>
+      )}
     </div>
   );
 };

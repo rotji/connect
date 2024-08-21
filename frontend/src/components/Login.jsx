@@ -1,9 +1,8 @@
-// src/components/Login.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import './Login.css'; // Import the Login.css file
 
-const Login = ({ setToken }) => {
+const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -16,11 +15,12 @@ const Login = ({ setToken }) => {
   const onSubmit = async e => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/users/login', formData);
-      const token = res.data.token;
-      localStorage.setItem('token', token);
-      setToken(token); 
+      const response = await axios.post('http://localhost:5000/api/users/login', formData);
       alert('Login successful');
+      
+      // Redirect to profile page with user id
+      const userId = response.data.user._id;
+      window.location.href = `/profile/${userId}`;
     } catch (err) {
       const errorMsg = err.response && err.response.data && err.response.data.msg 
                         ? err.response.data.msg 
