@@ -1,4 +1,3 @@
-// src/components/Chat.jsx
 import React, { useEffect, useState } from 'react';
 import io from 'socket.io-client';
 
@@ -7,37 +6,47 @@ console.log('Socket URL:', socketUrl);
 
 const socket = io(socketUrl);
 
-const Chat = () => {
+const Chat = ({ currentUserId, chatPartnerId }) => {
   const [message, setMessage] = useState('');
   const [chat, setChat] = useState([]);
 
-  useEffect(() => {    socket.on('chatMessage', (msg) => {
+  useEffect(() => {
+    socket.emit('joinRoom', currentUserId);
+
+    socket.on('privateMessage', (msg) => {
       setChat((prevChat) => [...prevChat, msg]);
     });
 
     return () => {
-      socket.off('chatMessage');
+      socket.off('privateMessage');
     };
-  }, []);
+  }, [currentUserId]);
 
   const sendMessage = () => {
-    socket.emit('chatMessage', message);
+    socket.emit('privateMessage', {
+      senderId: currentUserId,
+      receiverId: chatPartnerId,
+      message,
+    });
+    setChat((prevChat) => [...prevChat, { senderId: currentUserId, message }]);
     setMessage('');
   };
 
   return (
     <div>
-      <h2>Chat</h2>
+      <h2>Private Chat</h2>
       <div>
         {chat.map((msg, index) => (
-          <div key={index}>{msg}</div>
+          <div key={index}>
+            <strong>{msg.senderId === currentUserId ? 'You' : 'Them'}:</strong> {msg.message}
+          </div>
         ))}
       </div>
-      <input 
-        type="text" 
-        value={message} 
-        onChange={(e) => setMessage(e.target.value)} 
-        placeholder="Type a message" 
+      <input
+        type="text"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Type a message"
       />
       <button onClick={sendMessage}>Send</button>
     </div>
@@ -45,5 +54,3 @@ const Chat = () => {
 };
 
 export default Chat;
-
-// Removed the duplicate import and Chat component definition

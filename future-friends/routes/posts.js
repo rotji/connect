@@ -1,27 +1,31 @@
 const express = require('express');
 const router = express.Router();
 const Post = require('../models/Post');
-const User = require('../models/User'); // Added this line to require User model
+const User = require('../models/User');
 
 // Create a post
 router.post('/', async (req, res) => {
-   console.log(req.body);
-  const { userId, title, content } = req.body; // Changed `user` to `userId` to capture the user ID from the request body
+  console.log(req.body);
+  const { userId, content } = req.body;
+
   try {
     // Validate user exists
-    const user = await User.findById(userId); // Added validation to check if user exists
+    const user = await User.findById(userId);
     if (!user) {
-      return res.status(400).json({ msg: 'Invalid user' }); // Return error if user does not exist
+      return res.status(400).json({ msg: 'Invalid user' });
     }
 
     const newPost = new Post({
-      user: user._id, // Set the `user` field with the valid user ID
-      title,
-      content,
+      user: user._id,
+      content: content.trim(),
+      date: Date.now(), // Ensure the date is set when creating the post
     });
 
-    const post = await newPost.save();
-    res.json(post);
+    const savedPost = await newPost.save();
+
+    // Populate the user's profile information when sending the response
+    const populatedPost = await savedPost.populate('user', 'name email number category interest expectation').execPopulate();
+    res.status(201).json(populatedPost);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
@@ -31,7 +35,9 @@ router.post('/', async (req, res) => {
 // Get all posts
 router.get('/', async (req, res) => {
   try {
-    const posts = await Post.find().sort({ date: -1 });
+    const posts = await Post.find()
+      .populate('user', 'name email number category interest expectation')
+      .sort({ date: -1 });
     res.json(posts);
   } catch (err) {
     console.error(err.message);
@@ -42,7 +48,8 @@ router.get('/', async (req, res) => {
 // Get post by ID
 router.get('/:id', async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const post = await Post.findById(req.params.id)
+      .populate('user', 'name email number category interest expectation');
 
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
@@ -71,9 +78,13 @@ router.put('/:id', async (req, res) => {
 
     post.title = title || post.title;
     post.content = content || post.content;
+    post.date = Date.now(); // Update the date when the post is edited
 
     await post.save();
-    res.json(post);
+
+    // Populate the user's profile information after updating the post
+    const populatedPost = await post.populate('user', 'name email number category interest expectation').execPopulate();
+    res.json(populatedPost);
   } catch (err) {
     console.error(err.message);
     if (err.kind === 'ObjectId') {

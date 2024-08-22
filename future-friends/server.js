@@ -37,16 +37,25 @@ mongoose.connect(dbUri, {
   process.exit(1); // Exit the application if the database connection fails
 });
 
-// Handle WebSocket connections
+// Handle WebSocket connections for private chat
 io.on('connection', (socket) => {
   console.log('A user connected');
-  
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
+
+  // Join a room based on user ID
+  socket.on('joinRoom', (userId) => {
+    socket.join(userId);
+    console.log(`User with ID ${userId} joined room ${userId}`);
   });
 
-  socket.on('sendMessage', (msg) => {
-    io.emit('receiveMessage', msg);
+  // Handle private messages
+  socket.on('privateMessage', ({ senderId, receiverId, message }) => {
+    io.to(receiverId).emit('privateMessage', { senderId, message });
+    console.log(`Private message from ${senderId} to ${receiverId}: ${message}`);
+  });
+
+  // Handle disconnection
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
   });
 });
 

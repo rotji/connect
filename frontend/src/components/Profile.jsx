@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import UpdateProfile from './UpdateProfile';
+import Modal from './Modal'; // Import the Modal component
+import ExamplePrivateChat from './ExamplePrivateChat'; // Import the ExamplePrivateChat component
 import './Profile.css';
 
 const Profile = () => {
@@ -24,7 +26,7 @@ const Profile = () => {
 
   const handleProfileUpdate = useCallback((updatedProfile) => {
     setProfile(updatedProfile);
-    setIsEditing(false);
+    setIsEditing(false); // Close the modal after updating the profile
   }, []);
 
   const handleLogout = () => {
@@ -38,6 +40,9 @@ const Profile = () => {
   if (!profile) {
     return <div>Loading...</div>;
   }
+
+  const currentUserId = profile._id; // Assuming the profile being viewed belongs to the current user
+  const chatPartnerId = "someUserId"; // Replace this with the ID of the user you want to chat with
 
   return (
     <div className="profile-container">
@@ -56,9 +61,19 @@ const Profile = () => {
       )}
       <button onClick={handleLogout}>Logout</button>
       <button onClick={() => setIsEditing(true)}>Edit Profile</button>
+
+      {/* Modal for editing the profile */}
       {isEditing && (
-        <UpdateProfile profile={profile} setProfile={handleProfileUpdate} setIsEditing={setIsEditing} />
+        <Modal onClose={() => setIsEditing(false)}>
+          <UpdateProfile profile={profile} setProfile={handleProfileUpdate} />
+        </Modal>
       )}
+
+      {/* ExamplePrivateChat component for private messaging */}
+      <div className="private-chat-container">
+        <h3>Private Chat</h3>
+        <ExamplePrivateChat currentUserId={currentUserId} chatPartnerId={chatPartnerId} />
+      </div>
     </div>
   );
 };
