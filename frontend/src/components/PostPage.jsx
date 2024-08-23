@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CreatePost from './CreatePost';
 import PostList from './PostList';
 import axios from 'axios';
+import ErrorBoundary from './ErrorBoundary';
 
 const PostPage = () => {
   const [posts, setPosts] = useState([]);
@@ -26,8 +27,10 @@ const PostPage = () => {
 
   return (
     <div>
-      <CreatePost onCreatePost={addNewPost} />
-      <PostList posts={posts} />
+      <ErrorBoundary>
+        <CreatePost onCreatePost={addNewPost} />
+        <PostList posts={posts} />
+      </ErrorBoundary>
     </div>
   );
 };

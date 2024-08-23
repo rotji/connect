@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Modal from './Modal';
 import ExamplePrivateChat from './ExamplePrivateChat';
+import ErrorBoundary from './ErrorBoundary';
 
 const PostList = ({ posts }) => {
   const [selectedUser, setSelectedUser] = useState(null);
@@ -12,13 +13,17 @@ const PostList = ({ posts }) => {
   };
 
   const handleSeeProfile = (user) => {
-    setSelectedUser(user);
-    setModalContent('profile');
+    if (user) {
+      setSelectedUser(user);
+      setModalContent('profile');
+    }
   };
 
   const handlePrivateChat = (user) => {
-    setSelectedUser(user);
-    setModalContent('chat');
+    if (user) {
+      setSelectedUser(user);
+      setModalContent('chat');
+    }
   };
 
   return (
@@ -41,29 +46,16 @@ const PostList = ({ posts }) => {
       ))}
 
       {modalContent && selectedUser && (
-        <Modal show={!!modalContent} onClose={handleCloseModal}>
-          {modalContent === 'profile' ? (
-            <div>
-              <h2>{selectedUser.name}'s Profile</h2>
-              <p>Email: {selectedUser.email}</p>
-              <p>Phone: {selectedUser.phone}</p>
-              <p>Category: {selectedUser.category}</p>
-              <p>Details: {selectedUser.details}</p>
-              {selectedUser.profilePicture && (
-                <img
-                  src={`http://localhost:5000/uploads/${selectedUser.profilePicture}`}
-                  alt="Profile"
-                  className="profile-picture"
-                />
-              )}
-            </div>
-          ) : (
-            <ExamplePrivateChat
-              currentUserId="currentUserId" // Replace this with the actual current user ID
-              chatPartnerId={selectedUser._id} // Use the selected user's ID as the chat partner
-            />
-          )}
-        </Modal>
+        <ErrorBoundary>
+          <Modal show={!!modalContent} onClose={handleCloseModal} profile={modalContent === 'profile' ? selectedUser : null}>
+            {modalContent === 'chat' && (
+              <ExamplePrivateChat
+                currentUserId="currentUserId" // Replace this with the actual current user ID
+                chatPartnerId={selectedUser._id} // Use the selected user's ID as the chat partner
+              />
+            )}
+          </Modal>
+        </ErrorBoundary>
       )}
     </div>
   );

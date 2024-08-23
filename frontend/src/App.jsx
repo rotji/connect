@@ -14,6 +14,7 @@ import Navbar from './components/Navbar';
 import Home from './components/Home'; 
 import About from './components/About';
 import UserProfilesByInterestOrExpectation from './components/UserProfilesByInterestOrExpectation';
+import ErrorBoundary from './components/ErrorBoundary';
 import io from 'socket.io-client';
 
 const socket = io('http://localhost:5000');
@@ -47,16 +48,86 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
         <Route path="/about" element={<About />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/postpage" element={<PostPage />} />
-        <Route path="/chat" element={<Chat messages={messages} message={message} setMessage={setMessage} sendMessage={sendMessage} />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/registered-users" element={<RegisteredUsers />} />
-        <Route path="/interest-list" element={<InterestList />} />
-        <Route path="/expectation-list" element={<ExpectationList />} />
-        <Route path="/profiles" element={<UserProfilesByInterestOrExpectation />} />
+        <Route 
+          path="/profile" 
+          element={
+            <ErrorBoundary>
+              <Profile />
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/postpage" 
+          element={
+            <ErrorBoundary>
+              <PostPage />
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/chat" 
+          element={
+            <ErrorBoundary>
+              <Chat messages={messages} message={message} setMessage={setMessage} sendMessage={sendMessage} />
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/register" 
+          element={
+            <ErrorBoundary>
+              <Register />
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/login" 
+          element={
+            <ErrorBoundary>
+              <Login />
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/search" 
+          element={
+            <ErrorBoundary>
+              <Search />
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/registered-users" 
+          element={
+            <ErrorBoundary>
+              <RegisteredUsers />
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/interest-list" 
+          element={
+            <ErrorBoundary>
+              <InterestList />
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/expectation-list" 
+          element={
+            <ErrorBoundary>
+              <ExpectationList />
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/profiles" 
+          element={
+            <ErrorBoundary>
+              <UserProfilesByInterestOrExpectation />
+            </ErrorBoundary>
+          } 
+        />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
