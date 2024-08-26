@@ -11,13 +11,24 @@ import RegisteredUsers from './components/RegisteredUsers';
 import InterestList from './components/InterestList';
 import ExpectationList from './components/ExpectationList';
 import Navbar from './components/Navbar';
-import Home from './components/Home'; 
+import Home from './components/Home';
 import About from './components/About';
 import UserProfilesByInterestOrExpectation from './components/UserProfilesByInterestOrExpectation';
 import ErrorBoundary from './components/ErrorBoundary';
 import io from 'socket.io-client';
 
+// Sentry integration
+import * as Sentry from "@sentry/react";
+import { BrowserTracing } from "@sentry/tracing";
+
 const socket = io('http://localhost:5000');
+
+// Initialize Sentry
+Sentry.init({
+  dsn: "https://fe936dcf2f8072f9774a769e59f24a32@o4507832110415872.ingest.us.sentry.io/4507833717620736", // Your actual Sentry DSN URL
+  integrations: [new BrowserTracing()],
+  tracesSampleRate: 1.0, // Adjust the sample rate based on your needs
+});
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -48,85 +59,85 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
         <Route path="/about" element={<About />} />
-        <Route 
-          path="/profile" 
+        <Route
+          path="/profile"
           element={
             <ErrorBoundary>
               <Profile />
             </ErrorBoundary>
-          } 
+          }
         />
-        <Route 
-          path="/postpage" 
+        <Route
+          path="/postpage"
           element={
             <ErrorBoundary>
               <PostPage />
             </ErrorBoundary>
-          } 
+          }
         />
-        <Route 
-          path="/chat" 
+        <Route
+          path="/chat"
           element={
             <ErrorBoundary>
               <Chat messages={messages} message={message} setMessage={setMessage} sendMessage={sendMessage} />
             </ErrorBoundary>
-          } 
+          }
         />
-        <Route 
-          path="/register" 
+        <Route
+          path="/register"
           element={
             <ErrorBoundary>
               <Register />
             </ErrorBoundary>
-          } 
+          }
         />
-        <Route 
-          path="/login" 
+        <Route
+          path="/login"
           element={
             <ErrorBoundary>
               <Login />
             </ErrorBoundary>
-          } 
+          }
         />
-        <Route 
-          path="/search" 
+        <Route
+          path="/search"
           element={
             <ErrorBoundary>
               <Search />
             </ErrorBoundary>
-          } 
+          }
         />
-        <Route 
-          path="/registered-users" 
+        <Route
+          path="/registered-users"
           element={
             <ErrorBoundary>
               <RegisteredUsers />
             </ErrorBoundary>
-          } 
+          }
         />
-        <Route 
-          path="/interest-list" 
+        <Route
+          path="/interest-list"
           element={
             <ErrorBoundary>
               <InterestList />
             </ErrorBoundary>
-          } 
+          }
         />
-        <Route 
-          path="/expectation-list" 
+        <Route
+          path="/expectation-list"
           element={
             <ErrorBoundary>
               <ExpectationList />
             </ErrorBoundary>
-          } 
+          }
         />
-        <Route 
-          path="/profiles" 
+        <Route
+          path="/profiles"
           element={
             <ErrorBoundary>
               <UserProfilesByInterestOrExpectation />
             </ErrorBoundary>
-          } 
+          }
         />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
@@ -134,4 +145,4 @@ function App() {
   );
 }
 
-export default App;
+export default Sentry.withProfiler(App); // Wrap the App component with Sentry's Profiler
