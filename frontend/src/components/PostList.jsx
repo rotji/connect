@@ -3,7 +3,7 @@ import Modal from './Modal';
 import ExamplePrivateChat from './ExamplePrivateChat';
 import ErrorBoundary from './ErrorBoundary';
 
-const PostList = ({ posts }) => {
+const PostList = ({ posts, currentUserId }) => {  // Accept `currentUserId` as a prop
   const [selectedUser, setSelectedUser] = useState(null);
   const [modalContent, setModalContent] = useState(null);
 
@@ -32,7 +32,7 @@ const PostList = ({ posts }) => {
         <div key={post._id} className="post">
           <p>Posted by {post.user ? post.user.name : 'Unknown'} on {new Date(post.date).toLocaleString()}</p>
           <p>{post.content}</p>
-          {post.user && (
+          {post.user && post.user._id !== currentUserId && ( // Ensure the user is not chatting with themselves
             <div>
               <button onClick={() => handleSeeProfile(post.user)}>
                 See Profile
@@ -47,11 +47,15 @@ const PostList = ({ posts }) => {
 
       {modalContent && selectedUser && (
         <ErrorBoundary>
-          <Modal show={!!modalContent} onClose={handleCloseModal} profile={modalContent === 'profile' ? selectedUser : null}>
+          <Modal 
+            show={!!modalContent} 
+            onClose={handleCloseModal} 
+            profile={modalContent === 'profile' ? selectedUser : null}
+          >
             {modalContent === 'chat' && (
               <ExamplePrivateChat
-                currentUserId="currentUserId" // Replace this with the actual current user ID
-                chatPartnerId={selectedUser._id} // Use the selected user's ID as the chat partner
+                currentUserId={currentUserId}  // Use `currentUserId` directly passed from App.jsx
+                chatPartnerId={selectedUser._id}  // Use the selected user's ID as the chat partner
               />
             )}
           </Modal>

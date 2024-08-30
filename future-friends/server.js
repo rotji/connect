@@ -2,42 +2,37 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const http = require('http');
-const socketIo = require('socket.io');
+const { Server } = require('socket.io');
 const userRoutes = require('./routes/users'); 
-const postRoutes = require('./routes/posts');  
+const postRoutes = require('./routes/posts'); 
+const chatRoutes = require('./routes/chat'); 
 const cors = require('cors');
 const path = require('path');
 const logger = require('./logger');
+const Chat = require('./models/chat'); 
 
 // Import and configure Sentry
 const Sentry = require('@sentry/node');
-const { ProfilingIntegration } = require('@sentry/profiling-node');
-
 
 Sentry.init({
   dsn: "https://0407ce84a77488936b845eec59682b14@o4507832110415872.ingest.us.sentry.io/4507837299621888",
-  integrations: [
-    new Sentry.Integrations.Http({ tracing: true }),
-    new ProfilingIntegration(),  
-  ],
   tracesSampleRate: 1.0,
-  profilesSampleRate: 1.0,
 });
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
+const io = new Server(server, {
   cors: {
-    origin: "*",
-  },
+    origin: "http://localhost:5173", // Ensure this matches your frontend URL
+    methods: ["GET", "POST"]
+  }
 });
-
-// Sentry request handler middleware (must be before other middleware)
-app.use(Sentry.Handlers.requestHandler());
 
 // Middleware
 app.use(express.json());
-app.use(cors()); 
+app.use(cors({
+  origin: "http://localhost:5173", // Ensure CORS origin matches your frontend URL
+})); 
 
 // Serve static files from the "uploads" directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -65,10 +60,22 @@ io.on('connection', (socket) => {
     console.log(`User with ID ${userId} joined room ${userId}`);
   });
 
-  // Handle private messages
-  socket.on('privateMessage', ({ senderId, receiverId, message }) => {
-    io.to(receiverId).emit('privateMessage', { senderId, message });
-    console.log(`Private message from ${senderId} to ${receiverId}: ${message}`);
+  // Handle private messages (renamed to 'sendMessage')
+  socket.on('sendMessage', async ({ senderId, receiverId, message }) => {
+    if (!senderId || !receiverId) {
+      console.error('Failed to save message: senderId and receiverId are required');
+      return;
+    }
+
+    const newMessage = new Chat({ sender: senderId, receiver: receiverId, message });
+
+    try {
+      await newMessage.save();  // Save the message to MongoDB
+      io.to(receiverId).emit('receiveMessage', { senderId, receiverId, message }); // Emit to receiver with 'receiveMessage' event
+      console.log(`Message from ${senderId} to ${receiverId}: ${message}`);
+    } catch (error) {
+      console.error('Failed to save message:', error);
+    }
   });
 
   // Handle disconnection
@@ -82,14 +89,10 @@ app.get('/', (req, res) => {
   res.send('Future-Friends API');
 });
 
-// Sentry test route
-app.get('/debug-sentry', (req, res) => {
-  throw new Error('My first Sentry error!');
-});
-
 // Use the user routes (no token authentication required)
 app.use('/api/users', userRoutes); 
 app.use('/api/posts', postRoutes); 
+app.use('/api/chats', chatRoutes);
 
 // Endpoint to receive and log frontend logs
 app.post('/log', (req, res) => {
@@ -106,9 +109,6 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Server error' }); 
 });
-
-// Sentry error handler middleware (should be after other error handlers)
-app.use(Sentry.Handlers.errorHandler());
 
 // Start server
 const PORT = process.env.PORT || 5000;

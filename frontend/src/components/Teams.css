@@ -1,0 +1,48 @@
+/* Team.css */
+
+/* Container for the team list */
+.team-container {
+ padding: 20px;
+ max-width: 1200px;
+ margin: 0 auto;
+}
+
+/* Styling each team item */
+.team-item {
+ background-color: #f4f4f4;
+ margin: 10px 0;
+ padding: 15px;
+ border-radius: 8px;
+ box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+}
+
+/* Team name styling */
+.team-item h3 {
+ margin: 0;
+ font-size: 1.5em;
+ color: #333;
+}
+
+/* Description styling */
+.team-description {
+ color: #666;
+ font-size: 0.9em;
+}
+
+/* Join button styling */
+.team-item .join-button {
+ background-color: #007bff;
+ color: #fff;
+ padding: 10px 20px;
+ border: none;
+ border-radius: 5px;
+ cursor: pointer;
+ transition: background-color 0.3s ease;
+}
+
+.team-item .join-button:hover {
+ background-color: #0056b3;
+}

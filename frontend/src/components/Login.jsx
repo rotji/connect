@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import './Login.css'; // Import the Login.css file
+import UserContext from './UserContext'; // Import UserContext
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -9,25 +10,33 @@ const Login = () => {
   });
 
   const { email, password } = formData;
+  const { setCurrentUserId } = useContext(UserContext); // Use setCurrentUserId from UserContext
 
   const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const onSubmit = async e => {
-    e.preventDefault();
+  const loginUser = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/users/login', formData);
+      const response = await axios.post('http://localhost:5000/api/users/login', { email, password });
+      const userId = response.data.user._id; // Get the logged-in user's ID
+      console.log("User logged in, ID:", userId);
+
+      setCurrentUserId(userId);  // Set current user ID in context
       alert('Login successful');
-      
+
       // Redirect to profile page with user id
-      const userId = response.data.user._id;
       window.location.href = `/profile/${userId}`;
-    } catch (err) {
-      const errorMsg = err.response && err.response.data && err.response.data.msg 
-                        ? err.response.data.msg 
+    } catch (error) {
+      const errorMsg = error.response && error.response.data && error.response.data.msg 
+                        ? error.response.data.msg 
                         : 'An error occurred';
       alert('Error: ' + errorMsg);
-      console.error(err.response ? err.response.data : err.message);
+      console.error(error.response ? error.response.data : error.message);
     }
+  };
+
+  const onSubmit = async e => {
+    e.preventDefault();
+    await loginUser(email, password);  // Call loginUser function
   };
 
   return (

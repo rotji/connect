@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import UpdateProfile from './UpdateProfile';
 import Modal from './Modal'; // Import the Modal component
-import ExamplePrivateChat from './ExamplePrivateChat'; // Import the ExamplePrivateChat component
 import './Profile.css';
 
 const Profile = () => {
@@ -41,9 +40,6 @@ const Profile = () => {
     return <div>Loading...</div>;
   }
 
-  const currentUserId = profile._id; // Assuming the profile being viewed belongs to the current user
-  const chatPartnerId = "someUserId"; // Replace this with the ID of the user you want to chat with
-
   return (
     <div className="profile-container">
       <h2>User Profile</h2>
@@ -68,12 +64,6 @@ const Profile = () => {
           <UpdateProfile profile={profile} setProfile={handleProfileUpdate} />
         </Modal>
       )}
-
-      {/* ExamplePrivateChat component for private messaging */}
-      <div className="private-chat-container">
-        <h3>Private Chat</h3>
-        <ExamplePrivateChat currentUserId={currentUserId} chatPartnerId={chatPartnerId} />
-      </div>
     </div>
   );
 };
