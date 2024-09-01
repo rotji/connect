@@ -3,13 +3,14 @@ const express = require('express');
 const mongoose = require('mongoose');
 const http = require('http');
 const { Server } = require('socket.io');
-const userRoutes = require('./routes/users'); 
-const postRoutes = require('./routes/posts'); 
-const chatRoutes = require('./routes/chat'); 
+const userRoutes = require('./routes/users');
+const postRoutes = require('./routes/posts');
+const chatRoutes = require('./routes/chat');
+const teamRoutes = require('./routes/team'); // Add this line to import team routes
 const cors = require('cors');
 const path = require('path');
 const logger = require('./logger');
-const Chat = require('./models/chat'); 
+const Chat = require('./models/chat');
 
 // Import and configure Sentry
 const Sentry = require('@sentry/node');
@@ -32,7 +33,7 @@ const io = new Server(server, {
 app.use(express.json());
 app.use(cors({
   origin: "http://localhost:5173", // Ensure CORS origin matches your frontend URL
-})); 
+}));
 
 // Serve static files from the "uploads" directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -60,7 +61,7 @@ io.on('connection', (socket) => {
     console.log(`User with ID ${userId} joined room ${userId}`);
   });
 
-  // Handle private messages (renamed to 'sendMessage')
+  // Handle private messages
   socket.on('sendMessage', async ({ senderId, receiverId, message }) => {
     if (!senderId || !receiverId) {
       console.error('Failed to save message: senderId and receiverId are required');
@@ -89,17 +90,18 @@ app.get('/', (req, res) => {
   res.send('Future-Friends API');
 });
 
-// Use the user routes (no token authentication required)
-app.use('/api/users', userRoutes); 
-app.use('/api/posts', postRoutes); 
+// Use the routes
+app.use('/api/users', userRoutes);
+app.use('/api/posts', postRoutes);
 app.use('/api/chats', chatRoutes);
+app.use('/api/teams', teamRoutes); // Add this line to use team routes
 
 // Endpoint to receive and log frontend logs
 app.post('/log', (req, res) => {
   const { level = 'info', message } = req.body;
-  
+
   // Log the message to the server logs
-  logger.log({ level, message }); 
+  logger.log({ level, message });
 
   res.status(200).send('Log received');
 });
@@ -107,7 +109,7 @@ app.post('/log', (req, res) => {
 // Error handling middleware (should be after all routes)
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ error: 'Server error' }); 
+  res.status(500).json({ error: 'Server error' });
 });
 
 // Start server
