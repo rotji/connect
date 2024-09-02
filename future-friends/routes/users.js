@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const User = require('../models/User');
+const Notification = require('../models/Notification'); // Import Notification model
 const logger = require('../logger'); // Winston logger
 
 const router = express.Router();
@@ -23,9 +24,9 @@ let currentUser = null;
 
 // Register new user
 router.post('/register', async (req, res) => {
-  const { name, email, password, category, details, phone, interest, expectation } = req.body;
+  const { name, email, password, category, details, phone, interest, expectation, country, state, town, address } = req.body;
 
-  if (!name || !email || !password || !category || !details || !phone || !interest || !expectation) {
+  if (!name || !email || !password || !category || !details || !phone || !interest || !expectation || !country || !state || !town || !address) {
     return res.status(400).json({ msg: 'Please enter all fields' });
   }
 
@@ -35,12 +36,24 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ msg: 'User already exists' });
     }
 
-    user = new User({ name, email, password, category, details, phone, interest, expectation });
+    user = new User({ name, email, password, category, details, phone, interest, expectation, country, state, town, address });
 
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
 
     await user.save();
+
+    // Create notifications for all other users
+    const notificationMessage = `${user.name} has joined the platform!`;
+    const notifications = await User.find({ _id: { $ne: user._id } }).select('_id');
+    
+    notifications.forEach(async (otherUser) => {
+      await Notification.create({
+        type: 'registration',
+        message: notificationMessage,
+        userId: otherUser._id,
+      });
+    });
 
     logger.info(`User registered: ${user.id}`);
 
@@ -103,7 +116,7 @@ router.get('/profile', async (req, res) => {
 
 // Update user profile
 router.put('/profile', upload.single('profilePicture'), async (req, res) => {
-  const { name, email, category, details, phone, interest, expectation, password } = req.body;
+  const { name, email, category, details, phone, interest, expectation, password, country, state, town, address } = req.body;
   const profilePicture = req.file ? req.file.filename : null;
 
   if (!currentUser) {
@@ -124,6 +137,10 @@ router.put('/profile', upload.single('profilePicture'), async (req, res) => {
     if (phone) user.phone = phone;
     if (interest) user.interest = interest;
     if (expectation) user.expectation = expectation;
+    if (country) user.country = country;
+    if (state) user.state = state;
+    if (town) user.town = town;
+    if (address) user.address = address;
     if (profilePicture) user.profilePicture = profilePicture;
     if (password) {
       const salt = await bcrypt.genSalt(10);

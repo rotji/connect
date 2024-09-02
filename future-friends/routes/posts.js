@@ -23,8 +23,8 @@ router.post('/', async (req, res) => {
 
     const savedPost = await newPost.save();
 
-    // Populate the user's profile information when sending the response
-    const populatedPost = await savedPost.populate('user', 'name email number category interest expectation').execPopulate();
+    // Populate the user's profile information including country, state, town, and address
+    const populatedPost = await savedPost.populate('user', 'name email number category interest expectation country state town address').execPopulate();
     res.status(201).json(populatedPost);
   } catch (err) {
     console.error(err.message);
@@ -36,7 +36,7 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const posts = await Post.find()
-      .populate('user', 'name email number category interest expectation')
+      .populate('user', 'name email number category interest expectation country state town address')
       .sort({ date: -1 });
     res.json(posts);
   } catch (err) {
@@ -49,7 +49,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
-      .populate('user', 'name email number category interest expectation');
+      .populate('user', 'name email number category interest expectation country state town address');
 
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
@@ -82,8 +82,8 @@ router.put('/:id', async (req, res) => {
 
     await post.save();
 
-    // Populate the user's profile information after updating the post
-    const populatedPost = await post.populate('user', 'name email number category interest expectation').execPopulate();
+    // Populate the user's profile information after updating the post, including the new fields
+    const populatedPost = await post.populate('user', 'name email number category interest expectation country state town address').execPopulate();
     res.json(populatedPost);
   } catch (err) {
     console.error(err.message);

@@ -1,4 +1,3 @@
-// src/components/Register.jsx
 import React, { useState } from 'react';
 import './Register.css';
 
@@ -7,10 +6,14 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [category, setCategory] = useState('');
-  const [details, setDetails] = useState('');
   const [phone, setPhone] = useState('');
   const [interest, setInterest] = useState('');
   const [expectation, setExpectation] = useState('');
+  const [country, setCountry] = useState(''); 
+  const [state, setState] = useState(''); 
+  const [town, setTown] = useState(''); 
+  const [address, setAddress] = useState(''); 
+  const [details, setDetails] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -20,7 +23,20 @@ const Register = () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    const userData = { name, email, password, category, details, phone, interest, expectation };
+    const userData = { 
+      name, 
+      email, 
+      password, 
+      category,  
+      phone, 
+      interest, 
+      expectation, 
+      country,  
+      state,    
+      town,     
+      address,
+      details,   
+     };
 
     console.log('User data being submitted:', userData);
 
@@ -41,10 +57,14 @@ const Register = () => {
         setEmail('');
         setPassword('');
         setCategory('');
-        setDetails('');
         setPhone('');
         setInterest('');
         setExpectation('');
+        setCountry('');  
+        setState('');   
+        setTown('');     
+        setAddress(''); 
+        setDetails(''); 
         setMessage('Registration successful!');
         console.log('Registration successful:', data);
       } else {
@@ -94,13 +114,7 @@ const Register = () => {
           onChange={(e) => setCategory(e.target.value)}
           required
         />
-        <input
-          type="text"
-          placeholder="Details"
-          value={details}
-          onChange={(e) => setDetails(e.target.value)}
-          required
-        />
+    
         <input
           type="tel"
           placeholder="Phone"
@@ -122,6 +136,41 @@ const Register = () => {
           onChange={(e) => setExpectation(e.target.value)}
           required
         />
+        <input
+          type="text"
+          placeholder="Country"  // New input for country
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          placeholder="State"  // New input for state
+          value={state}
+          onChange={(e) => setState(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Town"  // New input for town
+          value={town}
+          onChange={(e) => setTown(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Address"  // New input for address
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Details"
+          value={details}
+          onChange={(e) => setDetails(e.target.value)}
+          required
+          />
         <button type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Registering...' : 'Register'}
         </button>

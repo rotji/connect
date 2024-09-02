@@ -47,7 +47,13 @@ const Profile = () => {
       <p>Email: {profile.email}</p>
       <p>Phone: {profile.phone}</p>
       <p>Category: {profile.category}</p>
-      <p>Details: {profile.details}</p>
+      <p>Interest: {profile.interest}</p> {/* New field for interest */}
+      <p>Expectation: {profile.expectation}</p> {/* New field for expectation */}
+      <p>Country: {profile.country}</p> {/* New field for country */}
+      <p>State: {profile.state}</p> {/* New field for state */}
+      <p>Town: {profile.town}</p> {/* New field for town */}
+      <p>Address: {profile.address}</p> {/* New field for address */}
+      <p>Details: {profile.details}</p> {/* "Details" moved to the last position */}
       {profile.profilePicture && (
         <img
           src={`http://localhost:5000/uploads/${profile.profilePicture}`}

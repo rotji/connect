@@ -15,6 +15,10 @@ const Modal = ({ show, onClose, profile }) => {
         <p><strong>Category:</strong> {profile.category ? profile.category : 'Not provided'}</p>
         <p><strong>Interest:</strong> {profile.interest ? profile.interest : 'Not provided'}</p>
         <p><strong>Expectation:</strong> {profile.expectation ? profile.expectation : 'Not provided'}</p>
+        <p><strong>Country:</strong> {profile.country ? profile.country : 'Not provided'}</p> {/* New field */}
+        <p><strong>State:</strong> {profile.state ? profile.state : 'Not provided'}</p>   {/* New field */}
+        <p><strong>Town:</strong> {profile.town ? profile.town : 'Not provided'}</p>     {/* New field */}
+        <p><strong>Address:</strong> {profile.address ? profile.address : 'Not provided'}</p> {/* New field */}
         <button onClick={onClose}>Close</button>
       </div>
     </div>

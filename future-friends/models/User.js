@@ -34,10 +34,26 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  country: {
+    type: String,
+    required: true,
+  },
+  state: {
+    type: String,
+    required: true,
+  },
+  town: {
+    type: String,
+    required: true,
+  },
+  address: {
+    type: String,
+    required: true,
+  },
   profilePicture: {
     type: String,
   },
 });
 
-// Check if the model is already compiled, and only define it if it's not
+// Check if the model exists, and only compile if it doesn't.
 module.exports = mongoose.models.User || mongoose.model('User', UserSchema);

@@ -3,7 +3,7 @@ import Modal from './Modal';
 import ExamplePrivateChat from './ExamplePrivateChat';
 import ErrorBoundary from './ErrorBoundary';
 
-const PostList = ({ posts, currentUserId }) => {  // Accept `currentUserId` as a prop
+const PostList = ({ posts, currentUserId }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [modalContent, setModalContent] = useState(null);
 
@@ -52,6 +52,21 @@ const PostList = ({ posts, currentUserId }) => {  // Accept `currentUserId` as a
             onClose={handleCloseModal} 
             profile={modalContent === 'profile' ? selectedUser : null}
           >
+            {modalContent === 'profile' && (
+              <div>
+                <p>Name: {selectedUser.name}</p>
+                <p>Email: {selectedUser.email}</p>
+                <p>Phone: {selectedUser.phone}</p>
+                <p>Category: {selectedUser.category}</p>
+                <p>Interest: {selectedUser.interest}</p>
+                <p>Expectation: {selectedUser.expectation}</p>
+                <p>Country: {selectedUser.country}</p> {/* Display Country */}
+                <p>State: {selectedUser.state}</p>      {/* Display State */}
+                <p>Town: {selectedUser.town}</p>        {/* Display Town */}
+                <p>Address: {selectedUser.address}</p>  {/* Display Address */}
+                <p>Details: {selectedUser.details}</p>
+              </div>
+            )}
             {modalContent === 'chat' && (
               <ExamplePrivateChat
                 currentUserId={currentUserId}  // Use `currentUserId` directly passed from App.jsx

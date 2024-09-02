@@ -18,6 +18,7 @@ import UserProfilesByInterestOrExpectation from './components/UserProfilesByInte
 import ErrorBoundary from './components/ErrorBoundary';
 import axios from 'axios';
 import { UserProvider } from './components/UserContext'; // Import UserProvider
+import Notifications from './components/Notifications'; // Import Notifications component
 
 function App() {
   const [currentUserId, setCurrentUserId] = useState(null);  // State to store current user's ID
@@ -126,13 +127,13 @@ function App() {
             }
           />
           <Route
-          path="/teams"
-          element={
-            <ErrorBoundary>
-              <Teams />  
-            </ErrorBoundary>
-          }
-        />
+            path="/teams"
+            element={
+              <ErrorBoundary>
+                <Teams />  
+              </ErrorBoundary>
+            }
+          />
           <Route
             path="/example-private-chat"
             element={
@@ -148,6 +149,14 @@ function App() {
             element={
               <ErrorBoundary>
                 <UserProfilesByInterestOrExpectation />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ErrorBoundary>
+                <Notifications currentUserId={currentUserId} /> {/* Include the Notifications component */}
               </ErrorBoundary>
             }
           />
