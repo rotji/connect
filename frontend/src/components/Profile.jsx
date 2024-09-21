@@ -43,17 +43,63 @@ const Profile = () => {
   return (
     <div className="profile-container">
       <h2>User Profile</h2>
-      <p>Name: {profile.name}</p>
-      <p>Email: {profile.email}</p>
-      <p>Phone: {profile.phone}</p>
-      <p>Category: {profile.category}</p>
-      <p>Interest: {profile.interest}</p> {/* New field for interest */}
-      <p>Expectation: {profile.expectation}</p> {/* New field for expectation */}
-      <p>Country: {profile.country}</p> {/* New field for country */}
-      <p>State: {profile.state}</p> {/* New field for state */}
-      <p>Town: {profile.town}</p> {/* New field for town */}
-      <p>Address: {profile.address}</p> {/* New field for address */}
-      <p>Details: {profile.details}</p> {/* "Details" moved to the last position */}
+      
+      {/* Profile details section with new fields */}
+      <div className="profile-detail">
+        <span className="profile-label">Name:</span>
+        <span className="profile-value">{profile.name}</span>
+      </div>
+
+      <div className="profile-detail">
+        <span className="profile-label">Email:</span>
+        <span className="profile-value">{profile.email}</span>
+      </div>
+
+      <div className="profile-detail">
+        <span className="profile-label">Phone:</span>
+        <span className="profile-value">{profile.phone}</span>
+      </div>
+
+      <div className="profile-detail">
+        <span className="profile-label">Category:</span>
+        <span className="profile-value">{profile.category}</span>
+      </div>
+
+      <div className="profile-detail">
+        <span className="profile-label">Interest:</span>
+        <span className="profile-value">{profile.interest}</span> {/* New field for interest */}
+      </div>
+
+      <div className="profile-detail">
+        <span className="profile-label">Expectation:</span>
+        <span className="profile-value">{profile.expectation}</span> {/* New field for expectation */}
+      </div>
+
+      <div className="profile-detail">
+        <span className="profile-label">Country:</span>
+        <span className="profile-value">{profile.country}</span> {/* New field for country */}
+      </div>
+
+      <div className="profile-detail">
+        <span className="profile-label">State:</span>
+        <span className="profile-value">{profile.state}</span> {/* New field for state */}
+      </div>
+
+      <div className="profile-detail">
+        <span className="profile-label">Town:</span>
+        <span className="profile-value">{profile.town}</span> {/* New field for town */}
+      </div>
+
+      <div className="profile-detail">
+        <span className="profile-label">Address:</span>
+        <span className="profile-value">{profile.address}</span> {/* New field for address */}
+      </div>
+
+      <div className="profile-detail">
+        <span className="profile-label">Details:</span>
+        <span className="profile-value">{profile.details}</span> {/* "Details" moved to the last position */}
+      </div>
+
       {profile.profilePicture && (
         <img
           src={`http://localhost:5000/uploads/${profile.profilePicture}`}
@@ -61,6 +107,7 @@ const Profile = () => {
           className="profile-picture"
         />
       )}
+
       <button onClick={handleLogout}>Logout</button>
       <button onClick={() => setIsEditing(true)}>Edit Profile</button>
 

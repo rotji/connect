@@ -1,73 +1,103 @@
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
 }
 
+/* Global Typography */
+body {
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  color: #333;
+  background-color: #f8f9fa;
+  line-height: 1.5;
+}
+
+/* Paragraph Styles */
+p {
+  line-height: 1.2;
+  /* Adjust to your preference */
+  margin: 0;
+  padding: 0;
+}
+
+/* Global Links */
 a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+  color: #3498db;
+  text-decoration: none;
 }
 
 a:hover {
-  color: #535bf2;
+  text-decoration: underline;
 }
 
-body {
-  margin: 0;
+/* Container */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+/* Existing Styles from your original index.css */
+header {
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  /* Center the elements horizontally */
+  padding: 1rem 0;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.logo {
+  height: 3em;
+  /* Smaller height */
+  padding: 0.5em;
+  /* Smaller padding */
+  transition: filter 300ms;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
 }
 
-button:hover {
-  border-color: #646cff;
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.title {
+  font-size: 2em;
+  /* Adjust the font size as needed */
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  /* Space between title and logo */
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
   }
 
-  a:hover {
-    color: #747bff;
+  to {
+    transform: rotate(360deg);
   }
+}
 
-  button {
-    background-color: #f9f9f9;
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
   }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
 }

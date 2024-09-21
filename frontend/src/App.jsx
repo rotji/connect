@@ -19,6 +19,9 @@ import ErrorBoundary from './components/ErrorBoundary';
 import axios from 'axios';
 import { UserProvider } from './components/UserContext'; // Import UserProvider
 import Notifications from './components/Notifications'; // Import Notifications component
+import ProfilePictureUpload from './components/ProfilePictureUpload'; // Import ProfilePictureUpload component
+import UserProfile from './components/UserProfile';
+
 
 function App() {
   const [currentUserId, setCurrentUserId] = useState(null);  // State to store current user's ID
@@ -158,6 +161,22 @@ function App() {
               <ErrorBoundary>
                 <Notifications currentUserId={currentUserId} /> {/* Include the Notifications component */}
               </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/upload-profile-picture"
+            element={
+              <ErrorBoundary>
+                <ProfilePictureUpload />  {/* Include the ProfilePictureUpload component */}
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/user-profile/:userId"
+            element={
+            <ErrorBoundary>
+            <UserProfile />
+            </ErrorBoundary>
             }
           />
           <Route path="*" element={<Navigate to="/" />} />
