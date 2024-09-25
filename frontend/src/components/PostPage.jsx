@@ -6,30 +6,39 @@ import ErrorBoundary from './ErrorBoundary';
 
 const PostPage = () => {
   const [posts, setPosts] = useState([]);
+  const [currentUserEmail, setCurrentUserEmail] = useState(null);  // Track the logged-in user's email
 
-  // Fetch existing posts when the component mounts
+  // Fetch existing posts and the current user's details when the component mounts
   useEffect(() => {
-    const fetchPosts = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/posts');
-        setPosts(res.data);
+        // Fetch posts from backend
+        const postsRes = await axios.get('http://localhost:5000/api/posts');
+        setPosts(postsRes.data);
+
+        // Fetch current user info from backend (replace with the actual API endpoint)
+        const userRes = await axios.get('http://localhost:5000/api/auth/currentUser'); // Assuming this endpoint provides current user info
+        setCurrentUserEmail(userRes.data.email);  // Set the current user's email
+
       } catch (err) {
-        console.error('Error fetching posts:', err);
+        console.error('Error fetching data:', err);
       }
     };
 
-    fetchPosts();
+    fetchData();
   }, []);
 
   const addNewPost = (newPost) => {
-    setPosts([newPost, ...posts]);
+    setPosts([newPost, ...posts]);  // Add new post to the list of posts
   };
 
   return (
     <div>
       <ErrorBoundary>
-        <CreatePost onCreatePost={addNewPost} />
-        <PostList posts={posts} />
+        {/* Pass currentUserEmail to PostList and CreatePost */}
+        <CreatePost onCreatePost={addNewPost} currentUserEmail={currentUserEmail} />
+        {/* Pass currentUserEmail to PostList for identification */}
+        {currentUserEmail && <PostList posts={posts} currentUserEmail={currentUserEmail} />}
       </ErrorBoundary>
     </div>
   );

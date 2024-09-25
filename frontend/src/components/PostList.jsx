@@ -3,7 +3,7 @@ import Modal from './Modal';
 import ExamplePrivateChat from './ExamplePrivateChat';
 import ErrorBoundary from './ErrorBoundary';
 
-const PostList = ({ posts, currentUserId }) => {
+const PostList = ({ posts, currentUserEmail }) => { // Change to use email for current user
   const [selectedUser, setSelectedUser] = useState(null);
   const [modalContent, setModalContent] = useState(null);
 
@@ -21,6 +21,7 @@ const PostList = ({ posts, currentUserId }) => {
 
   const handlePrivateChat = (user) => {
     if (user) {
+      console.log(`Private chat with ${user.email} initiated`); 
       setSelectedUser(user);
       setModalContent('chat');
     }
@@ -32,7 +33,7 @@ const PostList = ({ posts, currentUserId }) => {
         <div key={post._id} className="post">
           <p>Posted by {post.user ? post.user.name : 'Unknown'} on {new Date(post.date).toLocaleString()}</p>
           <p>{post.content}</p>
-          {post.user && post.user._id !== currentUserId && ( // Ensure the user is not chatting with themselves
+          {post.user && post.user.email !== currentUserEmail && ( // Check against email instead of user ID
             <div>
               <button onClick={() => handleSeeProfile(post.user)}>
                 See Profile
@@ -60,17 +61,17 @@ const PostList = ({ posts, currentUserId }) => {
                 <p>Category: {selectedUser.category}</p>
                 <p>Interest: {selectedUser.interest}</p>
                 <p>Expectation: {selectedUser.expectation}</p>
-                <p>Country: {selectedUser.country}</p> {/* Display Country */}
-                <p>State: {selectedUser.state}</p>      {/* Display State */}
-                <p>Town: {selectedUser.town}</p>        {/* Display Town */}
-                <p>Address: {selectedUser.address}</p>  {/* Display Address */}
+                <p>Country: {selectedUser.country}</p>
+                <p>State: {selectedUser.state}</p>
+                <p>Town: {selectedUser.town}</p>
+                <p>Address: {selectedUser.address}</p>
                 <p>Details: {selectedUser.details}</p>
               </div>
             )}
             {modalContent === 'chat' && (
               <ExamplePrivateChat
-                currentUserId={currentUserId}  // Use `currentUserId` directly passed from App.jsx
-                chatPartnerId={selectedUser._id}  // Use the selected user's ID as the chat partner
+                currentUserEmail={currentUserEmail}  // Pass current user's email
+                chatPartnerEmail={selectedUser.email}  // Pass selected user's email for private chat
               />
             )}
           </Modal>
