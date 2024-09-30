@@ -1,13 +1,13 @@
 name: CI Workflow
 
-# When the workflow should run: on every push or pull request to the main branch
+# Trigger workflow on push or pull request to any branch
 on:
   push:
     branches:
-      - main
+      - '**'  # This means any branch
   pull_request:
     branches:
-      - main
+      - '**'  # This means any branch
 
 jobs:
   # Define a job to run tests
@@ -21,12 +21,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Node.js (adjust the version as needed)
-      - name: Set up Node.js
+      # Step 2: Set up Node.js for backend
+      - name: Set up Node.js (Backend)
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'  # Specify the Node.js version
 
-      # Step 3: Install dependencies (this is a placeholder for now)
-      - name: Install dependencies
-        run: npm install
+      # Step 3: Install and test backend dependencies
+      - name: Install and test backend
+        run: |
+          cd backend   # Navigate to the backend directory
+          npm install  # Install backend dependencies
+          npm test     # Run backend tests
+
+      # Step 4: Set up Node.js for frontend
+      - name: Set up Node.js (Frontend)
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'  # Specify the Node.js version
+
+      # Step 5: Install and test frontend dependencies
+      - name: Install and test frontend
+        run: |
+          cd frontend   # Navigate to the frontend directory
+          npm install   # Install frontend dependencies
+          npm test      # Run frontend tests
