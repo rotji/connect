@@ -21,6 +21,7 @@ import { UserProvider } from './components/UserContext';
 import Notifications from './components/Notifications';
 import ProfilePictureUpload from './components/ProfilePictureUpload';
 import UserProfile from './components/UserProfile';
+import PaymentForm from './components/PaymentForm';
 
 function App() {
   const [currentUserEmail, setCurrentUserEmail] = useState(null);  // State to store current user's email
@@ -177,6 +178,14 @@ function App() {
             element={
               <ErrorBoundary>
                 <UserProfile />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/payment"  
+            element={
+              <ErrorBoundary>
+                <PaymentForm />
               </ErrorBoundary>
             }
           />
