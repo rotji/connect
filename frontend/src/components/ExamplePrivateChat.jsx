@@ -1,89 +1,90 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
-import axios from 'axios';
-import UserContext from './UserContext'; // Import UserContext
 
-// Initialize the Socket.io client
-const socket = io('http://localhost:5000'); // Replace with your server's address
-
-const ExamplePrivateChat = ({ chatPartnerId }) => { // Removed `currentUserId` prop
-  const { currentUserId } = useContext(UserContext); // Access `currentUserId` from context
-  const [messages, setMessages] = useState([]);
+const ExamplePrivateChat = ({ currentUserEmail, chatPartnerEmail }) => {
+  const [messages, setMessages] = useState([]); // Initialize as an empty array
   const [newMessage, setNewMessage] = useState('');
-
-  // Debugging: Log currentUserId and chatPartnerId
-  console.log('currentUserId:', currentUserId);
-  console.log('chatPartnerId:', chatPartnerId);
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    // Check if currentUserId and chatPartnerId are provided
-    if (!currentUserId || !chatPartnerId) {
-      console.error('Both senderId (currentUserId) and receiverId (chatPartnerId) are required.');
-      return;
-    }
+    // Establish Socket.io connection
+    const socketInstance = io('http://localhost:5000');
+    setSocket(socketInstance);
 
-    // Fetch existing messages from the server
-    const fetchMessages = async () => {
-      try {
-        const response = await axios.get(`http://localhost:5000/api/chats/messages/${currentUserId}/${chatPartnerId}`);
-        setMessages(response.data);
-      } catch (error) {
-        console.error('Error fetching messages:', error);
-      }
-    };
-
-    fetchMessages();
-
-    // Listen for incoming messages via Socket.io
-    socket.on('receiveMessage', (message) => {
+    // Listen for incoming messages
+    socketInstance.on('receive-message', (message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
 
-    // Clean up the effect
-    return () => {
-      socket.off('receiveMessage');
-    };
-  }, [currentUserId, chatPartnerId]);
-
-  const handleSendMessage = () => {
-    if (!currentUserId || !chatPartnerId) {
-      console.error("Both senderId (currentUserId) and receiverId (chatPartnerId) are required.");
-      return;
+    // Join room using a combination of both emails
+    if (currentUserEmail && chatPartnerEmail) {
+      const room = [currentUserEmail, chatPartnerEmail].sort().join('-'); // Create unique room name
+      socketInstance.emit('join-room', { email: currentUserEmail, room });
+      console.log(`User with email ${currentUserEmail} joined room ${room}`);
+    } else {
+      console.log('Invalid email: User or chatPartnerEmail is missing.');
     }
 
-    if (newMessage.trim() !== '') {
-      const message = {  // Corrected message object declaration
-        senderId: currentUserId,
-        receiverId: chatPartnerId,
-        message: newMessage,
+    // Cleanup on component unmount or when switching users
+    return () => {
+      socketInstance.disconnect();
+      setMessages([]); // Clear chat messages when switching chat partners
+    };
+  }, [currentUserEmail, chatPartnerEmail]);
+
+  const sendMessage = () => {
+    if (newMessage.trim() && currentUserEmail && chatPartnerEmail) {
+      const room = [currentUserEmail, chatPartnerEmail].sort().join('-'); // Ensure the message goes to the correct room
+      const message = {
+        sender: currentUserEmail,
+        content: newMessage,
+        room,
+        timestamp: new Date(),
       };
-
-      // Emit the message to the server via Socket.io
-      socket.emit('sendMessage', message);
-
-      // Optionally, update local state to display the message instantly
-      setMessages((prevMessages) => [...prevMessages, message]);
-      setNewMessage('');
+      socket.emit('send-message', message);
+      setMessages((prevMessages) => [...prevMessages, message]); // Update messages locally
+      setNewMessage(''); // Clear the input field
     }
   };
 
   return (
-    <div>
-      <div className="chat-box">
-        {messages.map((msg, index) => (
-          <div key={index} className={`message ${msg.senderId === currentUserId ? 'sent' : 'received'}`}>
-            {msg.message}
-          </div>
-        ))}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '400px', border: '1px solid #ccc' }}>
+      <h2>Private Chat with {chatPartnerEmail}</h2>
+      <div
+        className="chat-window"
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          border: '1px solid #ddd',
+          padding: '10px',
+          marginBottom: '10px',
+        }}
+      >
+        {messages.length > 0 ? (
+          messages.map((msg, index) => (
+            <div key={index} className={msg.sender === currentUserEmail ? 'my-message' : 'partner-message'}>
+              <strong>{msg.sender}:</strong> {msg.content}
+              <small> {new Date(msg.timestamp).toLocaleString()}</small>
+            </div>
+          ))
+        ) : (
+          <p>No messages yet.</p>
+        )}
       </div>
-      <div className="input-box">
+      <div style={{ display: 'flex' }}>
         <input
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Type a message..."
+          placeholder="Type your message..."
+          style={{ flex: 1, padding: '10px', fontSize: '16px' }}
         />
-        <button onClick={handleSendMessage}>Send</button>
+        <button
+          onClick={sendMessage}
+          style={{ padding: '10px 20px', fontSize: '16px', cursor: 'pointer' }}
+        >
+          Send
+        </button>
       </div>
     </div>
   );

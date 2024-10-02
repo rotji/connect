@@ -13,23 +13,49 @@
 
 .registered-users-item {
  border: 1px solid #ddd;
- padding: 15px;
- margin-bottom: 15px;
+ padding: 0px;
+ /* Reduced padding for a tighter box */
+ margin-bottom: 0px;
  border-radius: 8px;
  background-color: #f9f9f9;
  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+ display: flex;
+ flex-direction: column;
 }
 
 .registered-users-item p {
- margin: 5px 0;
+ margin: 0;
+ /* Remove margin for closer alignment */
+ display: flex;
+ justify-content: flex-start;
+ /* Align items to the left */
+ padding: 0;
+ /* Remove padding for closer alignment */
 }
 
 .registered-users-item p span {
  font-weight: bold;
  color: #333;
+ margin-right: 0;
+ /* No margin to bring label and value as close as possible */
+}
+
+.registered-users-item p:last-child {
+ margin-bottom: 5px;
+ /* Added margin for the last item for spacing */
 }
 
 .error {
  color: red;
  margin-bottom: 20px;
+}
+
+/* Chat input styling */
+.chat-input {
+ width: 5px;
+ /* Adjust the width as needed for a compact input */
+ padding: 4px;
+ /* Reduced padding for a more compact appearance */
+ border-radius: 5px;
+ border: 1px solid #ccc;
 }

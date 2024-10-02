@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import './App.css';
 import Register from './components/Register';
 import Login from './components/Login';
@@ -17,31 +17,35 @@ import About from './components/About';
 import UserProfilesByInterestOrExpectation from './components/UserProfilesByInterestOrExpectation';
 import ErrorBoundary from './components/ErrorBoundary';
 import axios from 'axios';
-import { UserProvider } from './components/UserContext'; // Import UserProvider
-import Notifications from './components/Notifications'; // Import Notifications component
+import { UserProvider } from './components/UserContext';
+import Notifications from './components/Notifications';
+import ProfilePictureUpload from './components/ProfilePictureUpload';
+import UserProfile from './components/UserProfile';
+import PaymentForm from './components/PaymentForm';
 
 function App() {
-  const [currentUserId, setCurrentUserId] = useState(null);  // State to store current user's ID
+  const [currentUserEmail, setCurrentUserEmail] = useState(null);  // State to store current user's email
   const [isAuthenticated, setIsAuthenticated] = useState(false);  // Track if user is logged in
+  const [chatPartnerEmail, setChatPartnerEmail] = useState('');  // State to store chat partner's email
 
   // Function to log in the user
   const loginUser = async (email, password) => {
     try {
       const response = await axios.post('http://localhost:5000/api/users/login', { email, password });
-      setCurrentUserId(response.data.user._id);  // Assuming response contains the user ID
-      setIsAuthenticated(true);  // Mark user as authenticated
+      setCurrentUserEmail(response.data.user.email);  // Ensure user email is correctly set after login
+      setIsAuthenticated(true);
     } catch (error) {
       console.error('Failed to log in:', error);
     }
   };
 
-  // Fetch user profile after login and set `currentUserId`
+  // Fetch user profile after login and set `currentUserEmail`
   useEffect(() => {
-    if (isAuthenticated) {  // Fetch only if authenticated
+    if (isAuthenticated) {
       const fetchUserProfile = async () => {
         try {
           const response = await axios.get('http://localhost:5000/api/users/profile');
-          setCurrentUserId(response.data._id); // Assume the user profile API returns the user ID as `_id`
+          setCurrentUserEmail(response.data.email);  // Set user email after fetching profile
         } catch (error) {
           console.error('Failed to fetch user profile:', error);
         }
@@ -49,10 +53,10 @@ function App() {
 
       fetchUserProfile();
     }
-  }, [isAuthenticated]); // Re-fetch if `isAuthenticated` changes
+  }, [isAuthenticated]);
 
   return (
-    <UserProvider> {/* Wrap your app with UserProvider */}
+    <UserProvider> {/* Wrap the app with UserProvider */}
       <div className="App">
         <Navbar />
         <header>
@@ -66,7 +70,7 @@ function App() {
             path="/profile"
             element={
               <ErrorBoundary>
-                <Profile currentUserId={currentUserId} />
+                <Profile currentUserEmail={currentUserEmail} />
               </ErrorBoundary>
             }
           />
@@ -74,7 +78,7 @@ function App() {
             path="/postpage"
             element={
               <ErrorBoundary>
-                <PostPage currentUserId={currentUserId} />
+                <PostPage currentUserEmail={currentUserEmail} />
               </ErrorBoundary>
             }
           />
@@ -90,7 +94,7 @@ function App() {
             path="/login"
             element={
               <ErrorBoundary>
-                <Login setCurrentUserId={setCurrentUserId} />  {/* Pass setCurrentUserId to Login component */}
+                <Login setCurrentUserEmail={setCurrentUserEmail} />
               </ErrorBoundary>
             }
           />
@@ -106,7 +110,7 @@ function App() {
             path="/registered-users"
             element={
               <ErrorBoundary>
-                <RegisteredUsers />
+                <RegisteredUsers setChatPartnerEmail={setChatPartnerEmail} />
               </ErrorBoundary>
             }
           />
@@ -130,20 +134,21 @@ function App() {
             path="/teams"
             element={
               <ErrorBoundary>
-                <Teams />  
+                <Teams />
               </ErrorBoundary>
             }
           />
+          
+          {/* Private chat route dynamically accepts chatPartnerEmail via URL parameter */}
           <Route
-            path="/example-private-chat"
+            path="/private-chat/:chatPartnerEmail"
             element={
               <ErrorBoundary>
-                <ExamplePrivateChat currentUserId={currentUserId} chatPartnerId={"someUserId"} />
-                {/* Log the userId passed */}
-                {console.log("Passing currentUserId to ExamplePrivateChat:", currentUserId)}
+                <PrivateChatWrapper currentUserEmail={currentUserEmail} />
               </ErrorBoundary>
             }
           />
+
           <Route
             path="/profiles"
             element={
@@ -156,7 +161,31 @@ function App() {
             path="/notifications"
             element={
               <ErrorBoundary>
-                <Notifications currentUserId={currentUserId} /> {/* Include the Notifications component */}
+                <Notifications currentUserEmail={currentUserEmail} />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/upload-profile-picture"
+            element={
+              <ErrorBoundary>
+                <ProfilePictureUpload />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/user-profile/:userId"
+            element={
+              <ErrorBoundary>
+                <UserProfile />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/payment-form"  
+            element={
+              <ErrorBoundary>
+                <PaymentForm />
               </ErrorBoundary>
             }
           />
@@ -164,6 +193,15 @@ function App() {
         </Routes>
       </div>
     </UserProvider>
+  );
+}
+
+// Wrapper component to extract chatPartnerEmail from URL parameters and pass it to ExamplePrivateChat
+function PrivateChatWrapper({ currentUserEmail }) {
+  const { chatPartnerEmail } = useParams();
+
+  return (
+    <ExamplePrivateChat currentUserEmail={currentUserEmail} chatPartnerEmail={chatPartnerEmail} />
   );
 }
 

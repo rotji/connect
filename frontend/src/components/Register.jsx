@@ -14,6 +14,7 @@ const Register = () => {
   const [town, setTown] = useState(''); 
   const [address, setAddress] = useState(''); 
   const [details, setDetails] = useState('');
+  const [profilePic, setProfilePic] = useState(null);  // State for profile picture
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -23,30 +24,44 @@ const Register = () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    const userData = { 
-      name, 
-      email, 
-      password, 
-      category,  
-      phone, 
-      interest, 
-      expectation, 
-      country,  
-      state,    
-      town,     
-      address,
-      details,   
-     };
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('email', email);
+    formData.append('password', password);
+    formData.append('category', category);
+    formData.append('phone', phone);
+    formData.append('interest', interest);
+    formData.append('expectation', expectation);
+    formData.append('country', country);
+    formData.append('state', state);
+    formData.append('town', town);
+    formData.append('address', address);
+    formData.append('details', details);
+    if (profilePic) {
+      formData.append('profilePic', profilePic);  // Append profile picture
+    }
 
-    console.log('User data being submitted:', userData);
+    // Log all user input values
+    console.log('Name:', name);
+    console.log('Email:', email);
+    console.log('Password:', password);
+    console.log('Category:', category);
+    console.log('Phone:', phone);
+    console.log('Interest:', interest);
+    console.log('Expectation:', expectation);
+    console.log('Country:', country);
+    console.log('State:', state);
+    console.log('Town:', town);
+    console.log('Address:', address);
+    console.log('Details:', details);
+    console.log('Profile Picture:', profilePic ? profilePic.name : 'No file chosen');
+
+    console.log('User data being submitted:', Object.fromEntries(formData));
 
     try {
       const response = await fetch('http://localhost:5000/api/users/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
+        body: formData,  // Use FormData for file upload
       });
 
       const data = await response.json();
@@ -65,6 +80,7 @@ const Register = () => {
         setTown('');     
         setAddress(''); 
         setDetails(''); 
+        setProfilePic(null);  // Reset profile picture
         setMessage('Registration successful!');
         console.log('Registration successful:', data);
       } else {
@@ -114,7 +130,6 @@ const Register = () => {
           onChange={(e) => setCategory(e.target.value)}
           required
         />
-    
         <input
           type="tel"
           placeholder="Phone"
@@ -170,7 +185,12 @@ const Register = () => {
           value={details}
           onChange={(e) => setDetails(e.target.value)}
           required
-          />
+        />
+        <input
+          type="file"  // New input for profile picture
+          accept="image/*"
+          onChange={(e) => setProfilePic(e.target.files[0])}
+        />
         <button type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Registering...' : 'Register'}
         </button>

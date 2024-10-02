@@ -23,8 +23,9 @@ const upload = multer({ storage });
 let currentUser = null;
 
 // Register new user
-router.post('/register', async (req, res) => {
+router.post('/register', upload.single('profilePic'), async (req, res) => {
   const { name, email, password, category, details, phone, interest, expectation, country, state, town, address } = req.body;
+  const profilePic = req.file ? req.file.filename : null;  // Updated variable name
 
   if (!name || !email || !password || !category || !details || !phone || !interest || !expectation || !country || !state || !town || !address) {
     return res.status(400).json({ msg: 'Please enter all fields' });
@@ -36,7 +37,7 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ msg: 'User already exists' });
     }
 
-    user = new User({ name, email, password, category, details, phone, interest, expectation, country, state, town, address });
+    user = new User({ name, email, password, category, details, phone, interest, expectation, country, state, town, address, profilePicture: profilePic });  // Updated to use profilePicture
 
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
@@ -55,7 +56,7 @@ router.post('/register', async (req, res) => {
       });
     });
 
-    logger.info(`User registered: ${user.id}`);
+    logger.info(`User registered: ${user.email}`); // Changed to use email
 
     res.json({ msg: 'User registered successfully', user });
   } catch (err) {
@@ -86,7 +87,7 @@ router.post('/login', async (req, res) => {
     // Set the currentUser to the logged-in user
     currentUser = user;
 
-    logger.info(`User logged in: ${user.id}`);
+    logger.info(`User logged in: ${user.email}`); // Changed to use email
 
     // Automatically return the user's profile upon successful login
     res.json({ msg: 'User logged in successfully', user });
@@ -103,7 +104,7 @@ router.get('/profile', async (req, res) => {
   }
 
   try {
-    const user = await User.findById(currentUser.id).select('-password');
+    const user = await User.findOne({ email: currentUser.email }).select('-password'); // Changed to search by email
     if (!user) {
       return res.status(404).json({ msg: 'No user found' });
     }
@@ -114,17 +115,17 @@ router.get('/profile', async (req, res) => {
   }
 });
 
-// Update user profile
-router.put('/profile', upload.single('profilePicture'), async (req, res) => {
+// Update user profile by email instead of user ID
+router.put('/profile', upload.single('profilePic'), async (req, res) => {
   const { name, email, category, details, phone, interest, expectation, password, country, state, town, address } = req.body;
-  const profilePicture = req.file ? req.file.filename : null;
+  const profilePic = req.file ? req.file.filename : null;  // Updated variable name
 
   if (!currentUser) {
     return res.status(401).json({ msg: 'No user is currently logged in' });
   }
 
   try {
-    const user = await User.findById(currentUser.id);
+    const user = await User.findOne({ email: currentUser.email }); // Changed to search by email
 
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
@@ -141,7 +142,7 @@ router.put('/profile', upload.single('profilePicture'), async (req, res) => {
     if (state) user.state = state;
     if (town) user.town = town;
     if (address) user.address = address;
-    if (profilePicture) user.profilePicture = profilePicture;
+    if (profilePic) user.profilePicture = profilePic;  // Updated to use profilePicture
     if (password) {
       const salt = await bcrypt.genSalt(10);
       user.password = await bcrypt.hash(password, salt);

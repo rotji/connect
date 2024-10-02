@@ -1,34 +1,49 @@
 const express = require('express');
-const Chat = require('../models/chat');
 const router = express.Router();
+const Chat = require('../models/chat');
 
-// Route to send a new message
-router.post('/send', async (req, res) => {
-  const { sender, receiver, message } = req.body;
+// Create or update a chat between two users
+router.post('/message', async (req, res) => {
+  const { senderEmail, receiverEmail, message } = req.body;
+
   try {
-    const newMessage = new Chat({ sender, receiver, message });
-    await newMessage.save();
-    res.status(201).send(newMessage);
-  } catch (error) {
-    res.status(500).send({ error: 'Failed to send message' });
+    let chat = await Chat.findOne({
+      $or: [
+        { senderEmail, receiverEmail },
+        { senderEmail: receiverEmail, receiverEmail: senderEmail }
+      ]
+    });
+
+    if (!chat) {
+      chat = new Chat({ senderEmail, receiverEmail, messages: [] });
+    }
+
+    chat.messages.push({ sender: senderEmail, text: message });
+    await chat.save();
+
+    res.status(200).json(chat);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to send message.' });
   }
 });
 
-// Endpoint to get chat messages between two users
-router.get('/messages/:currentUserId/:chatPartnerId', async (req, res) => {
-  const { currentUserId, chatPartnerId } = req.params;
+// Get chat messages between two users
+router.get('/messages', async (req, res) => {
+  const { senderEmail, receiverEmail } = req.query;
 
   try {
-    const chatMessages = await Chat.find({
+    const chat = await Chat.findOne({
       $or: [
-        { sender: currentUserId, receiver: chatPartnerId },
-        { sender: chatPartnerId, receiver: currentUserId },
-      ],
-    }).sort({ timestamp: 1 }); // Sort messages by the timestamp
+        { senderEmail, receiverEmail },
+        { senderEmail: receiverEmail, receiverEmail: senderEmail }
+      ]
+    });
 
-    res.status(200).json(chatMessages);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to retrieve chat messages' });
+    if (!chat) return res.status(404).json({ message: 'No chat found.' });
+
+    res.status(200).json(chat.messages);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve messages.' });
   }
 });
 

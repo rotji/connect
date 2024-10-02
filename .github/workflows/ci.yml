@@ -1,0 +1,44 @@
+name: CI Workflow
+
+on:
+  push:
+    branches:
+      - "**" # Run on all branches
+  pull_request:
+    branches:
+      - "**" # Run on all branches
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js for Backend
+      - name: Set up Node.js (Backend)
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"
+
+      # Step 3: Install and test Backend
+      - name: Install and test backend
+        run: |
+          cd future-friends  # Navigate to your backend folder
+          npm install
+          npm test
+
+      # Step 4: Set up Node.js for Frontend
+      - name: Set up Node.js (Frontend)
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"
+
+      # Step 5: Install and test Frontend
+      - name: Install and test frontend
+        run: |
+          cd frontend  # Navigate to your frontend folder
+          npm install
+          npm test
