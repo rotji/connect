@@ -1,4 +1,4 @@
-node_modules/
+
 # Ignore node_modules folder
 node_modules/
 
@@ -6,3 +6,6 @@ node_modules/
 .env
 dist/
 build/
+
+node_modules/
+
