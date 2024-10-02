@@ -8,9 +8,9 @@ const PaymentForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('/pay', { email, amount });
+            const response = await axios.post('http://localhost:5000/api/pay', { email, amount });
             // Handle the response (e.g., redirect to Paystack for payment)
-            console.log(response.data);
+            console.log('Payment successful', response.data);
         } catch (error) {
             console.error('Error during payment:', error);
         }
