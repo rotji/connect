@@ -182,7 +182,7 @@ function App() {
             }
           />
           <Route
-            path="/payment"  
+            path="/payment-form"  
             element={
               <ErrorBoundary>
                 <PaymentForm />

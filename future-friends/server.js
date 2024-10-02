@@ -12,8 +12,9 @@ const path = require('path');
 const logger = require('./logger');
 const Chat = require('./models/chat');
 const User = require('./models/User');
-const Post = require('./models/Post'); // Ensure this is included
+const Post = require('./models/Post');
 const paystack = require('paystack-api')(process.env.PAYSTACK_SECRET_KEY); // Paystack API initialization
+const axios = require('axios'); // For payment logic using Paystack or external API
 
 // Import multer for handling file uploads
 const multer = require('multer');
@@ -158,39 +159,47 @@ app.get('/', (req, res) => {
   res.send('Future-Friends API');
 });
 
+// Paystack payment integration
 
-// Paystack routes
-
-// 1. Initialize a Paystack transaction (this route is used to start a payment)
+// 1. Initialize a Paystack transaction
 app.post('/pay', async (req, res) => {
-    const { email, amount } = req.body; // Get email and amount from the request
-    try {
-        const response = await paystack.transaction.initialize({
-            email,
-            amount, // Amount in kobo (100 kobo = 1 NGN)
-        });
-        res.status(200).json(response); // Send the Paystack response back to the frontend
-    } catch (error) {
-        res.status(500).json({ error: error.message }); // Handle any errors
-    }
+  const { email, amount } = req.body;
+
+  try {
+    // Paystack payment initialization with axios
+    const response = await axios.post('https://api.paystack.co/transaction/initialize', {
+      email,
+      amount: amount * 100 // Paystack requires amount in kobo (smallest currency unit)
+    }, {
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` // Set Paystack secret key
+      }
+    });
+    
+    res.status(200).json(response.data); // Return Paystack response to the frontend
+  } catch (error) {
+    console.error('Error during payment:', error);
+    res.status(500).json({ error: 'Payment failed' });
+  }
 });
 
-// 2. Verify a Paystack transaction (this route is used to verify a payment by its reference)
+// 2. Verify a Paystack transaction
 app.get('/verify/:reference', async (req, res) => {
-    const { reference } = req.params; // Get the reference from the URL
-    try {
-        const response = await paystack.transaction.verify(reference); // Verify the transaction
-        res.status(200).json(response); // Send the verification response back to the frontend
-    } catch (error) {
-        res.status(500).json({ error: error.message }); // Handle any errors
-    }
+  const { reference } = req.params;
+
+  try {
+    const response = await paystack.transaction.verify(reference);
+    res.status(200).json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-// 3. Handle Paystack webhook events (this route receives notifications from Paystack)
+// 3. Handle Paystack webhook events
 app.post('/webhook', (req, res) => {
-    const event = req.body; // The event data from Paystack
-    // TODO: Implement logic based on the event type (e.g., charge.success)
-    res.status(200).send('Webhook received'); // Acknowledge that the webhook was received
+  const event = req.body;
+  // TODO: Add logic based on event type (e.g., charge.success)
+  res.status(200).send('Webhook received');
 });
 
 // Use the routes
