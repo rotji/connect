@@ -15,13 +15,16 @@ const User = require('./models/User');
 const Post = require('./models/Post');
 const paystack = require('paystack-api')(process.env.PAYSTACK_SECRET_KEY); // Paystack API initialization
 const axios = require('axios'); // For payment logic using Paystack or external API
-
-// Import multer for handling file uploads
-const multer = require('multer');
+const multer = require('multer'); // For handling file uploads
 
 // Import and configure Sentry
 const Sentry = require('@sentry/node');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 
+// Initialize MongoDB Memory Server
+let mongoServer;
+
+// Initialize Sentry
 Sentry.init({
   dsn: process.env.SENTRY_DSN, // Use an environment variable for the DSN
   tracesSampleRate: 1.0,
@@ -34,8 +37,8 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+  },
 });
 
 // Middleware
@@ -47,16 +50,28 @@ app.use(cors({
 // Serve static files from the "uploads" directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Database connection
-const dbUri = process.env.DATABASE_URL || 'mongodb://localhost:27017/futurefriends';
-mongoose.set('strictQuery', false);
-mongoose.connect(dbUri, {
+// MongoDB connection options
+const mongooseOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  autoIndex: true
-})
-.then(() => console.log(`Connected to MongoDB at ${dbUri}`))
-.catch(err => {
+};
+
+// Database connection
+const connectDatabase = async () => {
+  const dbUri = process.env.DATABASE_URL || 'mongodb://localhost:27017/futurefriends';
+
+  if (process.env.NODE_ENV === 'test') {
+    mongoServer = await MongoMemoryServer.create();
+    await mongoose.connect(mongoServer.getUri(), mongooseOptions);
+  } else {
+    mongoose.set('strictQuery', false);
+    await mongoose.connect(dbUri, mongooseOptions);
+  }
+
+  console.log(`Connected to MongoDB at ${mongoServer ? mongoServer.getUri() : dbUri}`);
+};
+
+connectDatabase().catch(err => {
   console.error('Failed to connect to MongoDB', err);
   process.exit(1);
 });
@@ -69,10 +84,10 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
+  },
 });
 
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   limits: { fileSize: 1024 * 1024 * 5 },
   fileFilter: (req, file, cb) => {
@@ -81,7 +96,7 @@ const upload = multer({
     } else {
       cb(new Error('Unsupported file type'), false);
     }
-  }
+  },
 });
 
 // Route to handle profile picture upload
@@ -160,8 +175,6 @@ app.get('/', (req, res) => {
 });
 
 // Paystack payment integration
-
-// 1. Initialize a Paystack transaction
 app.post('/pay', async (req, res) => {
   const { email, amount } = req.body;
 
@@ -169,13 +182,13 @@ app.post('/pay', async (req, res) => {
     // Paystack payment initialization with axios
     const response = await axios.post('https://api.paystack.co/transaction/initialize', {
       email,
-      amount: amount * 100 // Paystack requires amount in kobo (smallest currency unit)
+      amount: amount * 100, // Paystack requires amount in kobo (smallest currency unit)
     }, {
       headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` // Set Paystack secret key
-      }
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`, // Set Paystack secret key
+      },
     });
-    
+
     res.status(200).json(response.data); // Return Paystack response to the frontend
   } catch (error) {
     console.error('Error during payment:', error);
@@ -183,7 +196,7 @@ app.post('/pay', async (req, res) => {
   }
 });
 
-// 2. Verify a Paystack transaction
+// Verify a Paystack transaction
 app.get('/verify/:reference', async (req, res) => {
   const { reference } = req.params;
 
@@ -195,7 +208,7 @@ app.get('/verify/:reference', async (req, res) => {
   }
 });
 
-// 3. Handle Paystack webhook events
+// Handle Paystack webhook events
 app.post('/webhook', (req, res) => {
   const event = req.body;
   // TODO: Add logic based on event type (e.g., charge.success)
@@ -222,8 +235,20 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Server error' });
 });
 
-// Start server
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Start server only if not in test mode
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = process.env.PORT || 5000;
+  server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+// Clean up MongoDB Memory Server on exit
+process.on('exit', async () => {
+  if (mongoServer) {
+    await mongoServer.stop();
+  }
 });
+
+// Export app for testing or other purposes
+module.exports = app;
