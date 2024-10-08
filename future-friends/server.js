@@ -1,3 +1,4 @@
+const newrelic = require('newrelic');
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -46,6 +47,9 @@ app.use(express.json());
 app.use(cors({
   origin: process.env.FRONTEND_URL || "http://localhost:5173",
 }));
+
+// Pass newrelic to be accessible in frontend
+app.locals.newrelic = newrelic;
 
 // Serve static files from the "uploads" directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -220,6 +224,26 @@ app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/chats', chatRoutes);
 app.use('/api/teams', teamRoutes);
+
+// Serve your React frontend's static files (assuming Vite builds to /dist)
+app.use(express.static('dist'));
+
+// For any request, send the index.html with the New Relic Browser Monitoring Header
+app.get('*', (req, res) => {
+  const browserTimingHeader = newrelic.getBrowserTimingHeader();
+  const fs = require('fs');
+  const indexPath = __dirname + '/dist/index.html';
+
+  // Inject the browserTimingHeader into the HTML before sending it
+  fs.readFile(indexPath, 'utf8', (err, data) => {
+    if (err) throw err;
+    const updatedHtml = data.replace(
+      '<head>',
+      `<head>\n${browserTimingHeader}`
+    );
+    res.send(updatedHtml);
+  });
+});
 
 // Endpoint to receive and log frontend logs
 app.post('/log', (req, res) => {
